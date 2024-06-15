@@ -1,0 +1,14 @@
+# Ignore development files
+node_modules
+.next
+
+# Ignore Git files
+.git
+
+# Ignore GitHub-specific files
+.github
+Wireframes  
+__pycache__  
+
+api/model.ipynb
+database.db
