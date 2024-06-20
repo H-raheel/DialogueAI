@@ -19,7 +19,7 @@ export interface StoreApiKeysProps {
 }
 
 export interface ChatMessagesProps {
-  messages: Message[];
+  chatHistory: Message[];
 }
 
 export interface ChatInputProps {

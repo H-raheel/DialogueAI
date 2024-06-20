@@ -6,7 +6,9 @@ import AdminNavbar from "../../components/Navbars/TeacherNavbar.js";
 import Sidebar from "../../components/Sidebar/SidebarTeacher.js";
 import HeaderStats from "../../components/Headers/HeaderStats.js";
 import FooterAdmin from "../../components/Footers/FooterAdmin.js";
+
 import { AuthContextProvider } from "../../context/AuthContext";
+
 
 export default function Admin() {
   return (

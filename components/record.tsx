@@ -1,8 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatMessages from "./chatMessages";
 
 import { UserAuth } from "../context/AuthContext";
-import { auth } from "../pages/api/firebase";
 import type { ChatId } from "../types/chat";
 
 declare global {
@@ -14,11 +13,11 @@ declare global {
 export default function MicrophoneComponent({ chatid }: ChatId) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
-  const [fulltranscript, setTranscript] = useState([]);
+  const [fulltranscript, setTranscript] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("");
   const [botMessage, setBotMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState([]);
+  const [chatHistory, setChatHistory] = useState<any>([]);
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const recognitionRef = useRef<any>(null);
 
@@ -68,12 +67,12 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
     recognitionRef.current.start();
   };
 
-  function joinStringsLowercase(arr) {
+  function joinStringsLowercase(arr:any) {
     if (arr.length === 0) {
       return "";
     } else {
       const firstWord = arr[0];
-      const restWords = arr.slice(1).map(word => word.toLowerCase());
+      const restWords = arr.slice(1).map((word:any)   => word.toLowerCase());
       return firstWord + " " + restWords.join(" ");
     }
   }  
@@ -171,7 +170,9 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   return (
     <main className="flex flex-col min-h-screen items-center justify-between py-1 px-4 lg:px-0">
       <>
+     
         <ChatMessages chatHistory={chatHistory} />
+
         <div className="flex flex-col items-center w-full fixed bottom-0 pb-3 bg-gray-900">
           <button
             onClick={handleToggleRecording}

@@ -1,7 +1,7 @@
-import React from "react";
 import Chart from "chart.js/auto";
+import React from "react";
 
-export default function CardBarChart() {
+export default function CardBarChart({role}) {
   React.useEffect(() => {
     let config = {
       type: "bar",
@@ -15,24 +15,52 @@ export default function CardBarChart() {
           "June",
           "July",
         ],
-        datasets: [
-          {
-            label: new Date().getFullYear(),
-            backgroundColor: "#ed64a6",
-            borderColor: "#ed64a6",
-            data: [30, 78, 56, 34, 100, 45, 13],
-            fill: false,
-            barThickness: 8,
-          },
-          {
-            label: new Date().getFullYear() - 1,
-            fill: false,
-            backgroundColor: "#4c51bf",
-            borderColor: "#4c51bf",
-            data: [27, 68, 86, 74, 10, 4, 87],
-            barThickness: 8,
-          },
-        ],
+       
+          datasets: [
+           
+            // Additional datasets for languages
+            {
+              label: "English",
+              backgroundColor: "rgba(75, 81, 191, 0.5)",
+              borderColor: "rgba(75, 81, 191, 1)",
+              data: [50, 62, 70, 58, 55, 63, 70],
+              fill: false,
+              barThickness: 5,
+            },
+            {
+              label: "Japanese",
+              backgroundColor: "rgba(255, 193, 7, 0.5)",
+              borderColor: "rgba(255, 193, 7, 1)",
+              data: [42, 54, 65, 49, 45, 55, 62],
+              fill: false,
+              barThickness: 5,
+            },
+            {
+              label: "Spanish",
+              backgroundColor: "rgba(54, 162, 235, 0.5)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              data: [38, 48, 55, 42, 40, 50, 58],
+              fill: false,
+              barThickness: 5,
+            },
+            {
+              label: "Portuguese",
+              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              borderColor: "rgba(255, 99, 132, 1)",
+              data: [30, 40, 45, 35, 32, 42, 50],
+              fill: false,
+              barThickness: 5,
+            },
+            {
+              label: "German",
+              backgroundColor: "rgba(153, 102, 255, 0.5)",
+              borderColor: "rgba(153, 102, 255, 1)",
+              data: [25, 30, 38, 28, 25, 32, 40],
+              fill: false,
+              barThickness: 5,
+            },
+          ],
+        
       },
       options: {
         maintainAspectRatio: false,
@@ -100,15 +128,15 @@ export default function CardBarChart() {
   }, []);
   return (
     <>
-      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded pb-8">
         <div className="rounded-t mb-0 px-4 py-3 bg-transparent">
           <div className="flex flex-wrap items-center">
             <div className="relative w-full max-w-full flex-grow flex-1">
               <h6 className="uppercase text-blueGray-400 mb-1 text-xs font-semibold">
-                Performance
+              Assignments
               </h6>
               <h2 className="text-blueGray-700 text-xl font-semibold">
-                Total Games
+               {role=="Student"? "Assignments Submitted":" Assignments Given"}
               </h2>
             </div>
           </div>

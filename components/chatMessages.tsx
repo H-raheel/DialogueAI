@@ -1,8 +1,7 @@
 import Image from "next/image";
-import type { ChatMessagesProps } from "../types/chat";
-import type { ChatId } from "../types/chat";
+import { useState } from "react";
 import { UserAuth } from "../context/AuthContext";
-import { useEffect, useState, useRef } from "react";
+import type { ChatMessagesProps } from "../types/chat";
 
 
 export default function ChatMessages({ chatHistory }: ChatMessagesProps) {
@@ -10,7 +9,7 @@ export default function ChatMessages({ chatHistory }: ChatMessagesProps) {
   const [loading, setLoading] = useState(false);
 
   return (
-    <div className="absolute mt-10 lg:mt-20 pt-1 pb-48 px-6 w-full max-h-screen overflow-y-auto lg:w-3/4 xl:w-2/4 border-0 lg:border-x-2 lg:border-white bg-white rounded-md">
+    <div className="fixed z-10 mt-10  lg:mt-20 pt-1 px-6  w-full h-96 overflow-y-auto lg:w-3/4 xl:w-2/4 border-0 lg:border-x-2 lg:border-white bg-white rounded-md">
       {(chatHistory && chatHistory.length === 0) || (!chatHistory) ? (
         <div className="flex flex-col items-center">
           <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">
