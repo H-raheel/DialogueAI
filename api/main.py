@@ -32,7 +32,6 @@ conversation = ConversationChain(
 )
 
 prompt_file = open("system_instructions/language_expert.txt", "r").read()
-print(f"prompt_file = {prompt_file}")
 
 def connect():
     global db, client
@@ -234,6 +233,9 @@ def updateChat():
     result = result[0]
 
 
+"""
+Converts voice to text using speech_recognition module
+"""
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     data = request.get_json()
@@ -249,7 +251,7 @@ def transcribe():
     try:
         with sr.AudioFile(file_path) as source:
             audio = recognizer.record(source)
-            text = recognizer.recognize_whisper(audio)
+            text = recognizer.recognize_whisper(audio) # You can try other recognizers as well, besides whisper
             return jsonify({"transcription": text})
     except sr.UnknownValueError:
         return jsonify({"error": "Could not understand audio"}), 400
@@ -259,6 +261,9 @@ def transcribe():
         return jsonify({"error": "File not found"}), 400
 
 
+"""
+Calls OpenAI LLM to Get Feedback. The system instructions for the LLM is provided in system_instructions directory.
+"""
 @app.route('/feedback', methods=['POST'])
 def feedback():
     data = request.get_json()
@@ -285,6 +290,10 @@ def feedback():
     return jsonify({"feedback": feedback_text.content})
 
 
+"""
+Saves the recorded audio from record_voice.py to api/recordings/ directory.
+TODO: Use this api to record voice, instead of record_voice.py
+"""
 @app.route('/record', methods=['POST'])
 def record():
     print("Inside record api call")
@@ -293,7 +302,6 @@ def record():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files['file']
-    print(f"file = {file}")
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
@@ -302,5 +310,5 @@ def record():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=8888, host='0.0.0.0')
 

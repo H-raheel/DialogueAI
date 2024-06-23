@@ -46,17 +46,12 @@ def record_voice(output_filename, record_seconds=5):
 def send_audio_file(file_path, api_url):
     print("Inside send_audio_file")
     with open(file_path, 'rb') as audio_file:
-        print(f"api_url = {api_url}")
-        print(f"audio_file = {audio_file}")
         response = requests.post(api_url, files={'file': audio_file})
-        print(f"response in send_audio_file = {response}")
         return response.json()
 
 
 def get_feedback(api_url, text):
-    print("Inside get_feedback")
     response = requests.post(api_url, json={"text": text})
-    print(f"response in get_feedback = {response}")
     return response.json()
 
 
