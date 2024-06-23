@@ -1,6 +1,7 @@
-from flask import Flask, request, flash
-import numpy as np
-from datetime import datetime
+from flask import Flask, request, flash, jsonify
+
+from openai import OpenAI
+from openai.types.chat import ChatCompletion
 from pymongo.mongo_client import MongoClient
 import pymongo
 from __init__ import envs
@@ -11,6 +12,7 @@ import os
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationSummaryBufferMemory
+import speech_recognition as sr
 from langchain.callbacks import get_openai_callback
 
 app = Flask(__name__)
@@ -18,10 +20,19 @@ load_dotenv()
 openaiKey = os.getenv("OPENAI_API_KEY")
 
 chat = ChatOpenAI(openai_api_key=openaiKey, model_name="gpt-3.5-turbo")
+
+# Create OpenAI client for calling ChatCompletion API
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
+
 conversation = ConversationChain(
     llm=chat,
     verbose=False,
 )
+
+prompt_file = open("system_instructions/language_expert.txt", "r").read()
+print(f"prompt_file = {prompt_file}")
 
 def connect():
     global db, client
@@ -54,6 +65,9 @@ def addUser(entry:dict):
     )
     return insert.inserted_id
 
+# @app.route('/', methods=['GET'])
+# def printHello():
+#     return "Hello"
 @app.route('/api/get_details', methods=['GET', 'POST'])
 def getDetails():
     req = request.get_json()
@@ -62,6 +76,7 @@ def getDetails():
     result = result[0]
     result['_id'] = str(result['_id'])
     return result
+
 
 @app.route('/api/get_role', methods=['GET', 'POST'])
 def getRole():
@@ -73,23 +88,26 @@ def getRole():
         'role': result['role']
     }
 
+
 @app.route('/api/getLang', methods=['GET', 'POST'])
 def getLang():
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
-    obj = ObjectId(chatid)  
+    obj = ObjectId(chatid)
     result = db.find({ "_id": obj })
     result = result[0]
     return {
         'lang': result['language']
     }
 
+
 def getClasses(uid):
     result = db.find({ "user_id": uid })
     resultIds = [i._id for i in result]
     resultNames = [i['name'] for i in result]
     return resultIds, resultNames
+
 
 @app.route('/api/getClasses', methods=['GET', 'POST'])
 def userGetClasses():
@@ -104,17 +122,18 @@ def getChatIds():
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
-    obj = ObjectId(chatid)  
+    obj = ObjectId(chatid)
     result = db.find({ "_id": obj })
     result = result[0]
     return {'result': result}
+
 
 @app.route('/api/openChat', methods=['GET', 'POST'])
 def openChat():
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
-    obj = ObjectId(chatid)  
+    obj = ObjectId(chatid)
     result = db.find({ "_id": obj })
     result = result[0]
     assignmentid = result['assignment_id']
@@ -124,6 +143,7 @@ def openChat():
     history = [{'role': 'Human' if (idx+1) % 2 else 'AI', 'content': i.split(": ")[1]} for idx, i in enumerate(history)]
     # human, AI, human, AI pattern
     return {'chatHistory': history}
+
 
 def updateMemory(assignmentid, userid):
     #updates global conversation memory
@@ -150,7 +170,7 @@ def assign():
     req = request.get_json()
     target = req['target'] #either 'everyone' or 'student'
     assignment_name = req['assignment_name']
-    
+
     #insert = db.insert_one(
     #    {
     #        'user_id': uid,
@@ -191,7 +211,7 @@ def getAssignmentDetail():
     db2 = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
-    obj = ObjectId(chatid)  
+    obj = ObjectId(chatid)
     format = r'%Y-%m-%d'
     result = db2.find({ "_id": obj })
     result = result[0]
@@ -209,10 +229,78 @@ def updateChat():
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
-    obj = ObjectId(chatid)  
+    obj = ObjectId(chatid)
     result = db.find({ "_id": obj })
     result = result[0]
 
+
+@app.route('/transcribe', methods=['POST'])
+def transcribe():
+    data = request.get_json()
+    filename = data.get('filename')
+
+    print(f"data = {data}")
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+
+    recognizer = sr.Recognizer()
+    file_path = os.path.join('recordings', filename)
+
+    try:
+        with sr.AudioFile(file_path) as source:
+            audio = recognizer.record(source)
+            text = recognizer.recognize_whisper(audio)
+            return jsonify({"transcription": text})
+    except sr.UnknownValueError:
+        return jsonify({"error": "Could not understand audio"}), 400
+    except sr.RequestError:
+        return jsonify({"error": "Could not request results"}), 400
+    except FileNotFoundError:
+        return jsonify({"error": "File not found"}), 400
+
+
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    data = request.get_json()
+    text = data.get('text')
+
+    print(f"text = {text}")
+
+    if not text:
+        return jsonify({"error": "Text not provided"}), 400
+
+    # OpenAI API call for grammar and vocabulary feedback
+
+    response: ChatCompletion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": f"{prompt_file}"},
+            {"role": "user", "content": f"{text}"}
+        ],
+        max_tokens=150
+    )
+
+    feedback_text = response.choices[0].message
+    print(f"feedback_text = {feedback_text}")
+    return jsonify({"feedback": feedback_text.content})
+
+
+@app.route('/record', methods=['POST'])
+def record():
+    print("Inside record api call")
+    # Simulate recording by saving the uploaded file
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    print(f"file = {file}")
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    file.save(os.path.join('recordings', file.filename))
+    return jsonify({"message": "File saved successfully"}), 200
+
+
 if __name__ == '__main__':
-    app.run(debug=False, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=5000, host='0.0.0.0')
 

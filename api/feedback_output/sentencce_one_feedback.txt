@@ -1,0 +1,19 @@
+### This is just a static text file, copied manually. It contains the transcription of voice to text and feedback from llm.
+
+Transcription:  I want to drunk coffee yesterday.
+Inside get_feedback
+response in get_feedback = <Response [200]>
+Feedback: Feedback:
+
+1. Grammatical Errors:
+   - The correct sentence should be: "I wanted to drink coffee yesterday."
+
+2. Suggestions for Improvement:
+   - The sentence should be in the past tense since it is referring to an action that was intended in the past but may not have happened. By changing "want" to "wanted" and "drunk" to "drink," the sentence will be grammatically correct.
+
+3. Vocabulary Enhancement:
+   - Consider using more descriptive language to enhance the sentence, such as: "Yesterday, I had a strong craving for a cup of coffee."
+
+By making these adjustments, you can improve the clarity and correctness of your statement.
+
+Process finished with exit code 0
