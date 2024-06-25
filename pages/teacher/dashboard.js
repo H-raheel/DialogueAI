@@ -1,30 +1,31 @@
 import React from "react";
 
 // components
-import Dashboard from "../../components/dashboard.js";
+import FooterAdmin from "../../components/Footers/FooterAdmin.js";
+import HeaderStats from "../../components/Headers/HeaderStats.js";
 import AdminNavbar from "../../components/Navbars/TeacherNavbar.js";
 import Sidebar from "../../components/Sidebar/SidebarTeacher.js";
-import HeaderStats from "../../components/Headers/HeaderStats.js";
-import FooterAdmin from "../../components/Footers/FooterAdmin.js";
-
-import { AuthContextProvider } from "../../context/AuthContext";
+import Dashboard from "../../components/dashboard.js";
+import withRoleProtection from "../../hoc/authWrap.jsx";
 
 
-export default function Admin() {
+ function TeacherDashboard() {
   return (
     <>
-    <AuthContextProvider>
+   
       <Sidebar />
       <div className="relative md:ml-64 bg-blueGray-100">
         <AdminNavbar />
-        {/* Header */}
+        
         <HeaderStats />
         <div className="px-4 md:px-10 mx-auto w-full -m-24">
           <Dashboard />
           <FooterAdmin />
         </div>
       </div>
-    </AuthContextProvider>
+    
     </>
   );
 }
+
+export default withRoleProtection(TeacherDashboard,['teacher'])

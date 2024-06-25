@@ -2,14 +2,14 @@ import React from "react";
 
 // components
 
-import CardSettings from "../../components/Cards/CardSettings.js";
 import CardProfile from "../../components/Cards/CardProfile.js";
-
+import CardSettings from "../../components/Cards/CardSettings.js";
+import withRoleProtection from "../../hoc/authWrap.jsx";
 // layout for page
 
-import Admin from "layouts/Admin.js";
+//import Admin from "layouts/Admin.js";
 
-export default function Settings() {
+ function Settings() {
   return (
     <>
       <div className="flex flex-wrap">
@@ -24,4 +24,6 @@ export default function Settings() {
   );
 }
 
-Settings.layout = Admin("student");
+//Settings.layout = Admin("student");
+
+export default withRoleProtection(Settings, ['student'])

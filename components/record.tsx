@@ -56,7 +56,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
 
     recognitionRef.current.onresult = (event: any) => {
       const curtranscript = event.results[event.results.length - 1][0].transcript;
-      //console.log(event.results[event.results.length - 1])
+      console.log(event.results[event.results.length - 1])
       //console.log(event.results[event.results.length - 1][0].isFinal)
       if (event.results[event.results.length - 1].isFinal && curtranscript != "") {
         //console.log(event.results);
@@ -168,12 +168,12 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   }, [chatid]);
 
   return (
-    <main className="flex flex-col min-h-screen items-center justify-between py-1 px-4 lg:px-0">
+    <main className="flex flex-row min-h-screen justify-around py-1 px-4 fixed space-x-2">
       <>
      
         <ChatMessages chatHistory={chatHistory} />
-
-        <div className="flex flex-col items-center w-full fixed bottom-0 pb-3 bg-gray-900">
+     
+        <div className="flex flex-col items-center w-full fixed bottom-0 pb-3">
           <button
             onClick={handleToggleRecording}
             className={`mt-10 m-auto flex items-center justify-center ${
@@ -203,6 +203,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
           </button>
         </div>
       </>
+      <ChatMessages chatHistory={chatHistory} />
     </main>
   );
 }

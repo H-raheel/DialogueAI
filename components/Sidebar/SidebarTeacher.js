@@ -1,39 +1,48 @@
-import React from "react";
+import {
+  signOut
+} from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
-import { UserAuth } from "../../context/AuthContext";
+import React from "react";
+import { useDispatch } from "react-redux";
 import { auth } from "../../pages/api/firebase";
-import { useEffect } from "react";
-
+import { removeUser } from "../../store/reducers/authSlice.js";
 import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
 
 export default function Sidebar() {
-  const { user, googleSignIn, logOut } = UserAuth() || {};
+//  const { user, googleSignIn, logOut } = UserAuth() || {};
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
   const [loading, setLoading] = React.useState(true);
+const dispatch=useDispatch()
+  const logOut =  () => {
+    signOut(auth).then(() => {
+      console.log("logging ")
+    dispatch(removeUser())
+    });
+  };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!user) {
+  //       setLoading(true);
+  //       return;
+  //     }
+  //     setLoading(true);
+  //     const uid = user.uid;
+  //   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(true);
-        return;
-      }
-      setLoading(true);
-      const uid = user.uid;
-    };
-
-    fetchData(); // Call fetchData when the component mounts
-  }, [user]);
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [user]);
 
   const handleSignOut = async (event) => {
-    console.log('debug', logOut)
+
+    console.log('debug loggingout');
     try {
         event.preventDefault();
-        await logOut();
+  logOut();
+
     }
     catch (error) {
         console.log(error);

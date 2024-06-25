@@ -1,13 +1,12 @@
-import React from "react";
-
 import Footer from "components/Footers/Footer.js";
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import React, { useState } from "react";
+import withRoleProtection from "../../hoc/authWrap.jsx";
 import CardBarChart from "../components/Cards/CardBarChart.js";
 import CardPageVisits from "../components/Cards/CardPageVisits.js";
 import CardSocialTraffic from "../components/Cards/CardSocialTraffic.js";
 
-export default function Profile() {
+const Profile=()=> {
   const [imageSrc, setImageSrc] = useState('3');
   const router = useRouter();
   return (
@@ -135,3 +134,4 @@ export default function Profile() {
     </>
   );
 }
+export default withRoleProtection(Profile, ['student'])

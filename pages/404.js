@@ -1,12 +1,12 @@
-import React, { Component } from "react";
-import Router from "next/router";
+// pages/unauthorized.js
 
-export default class Error404 extends Component {
-  componentDidMount = () => {
-    Router.push("/");
-  };
+const Unauthorized = () => {
+  return (
+    <div className="text-slate-50 font-extrabold">
+      <h1>404-Not Found</h1>
+      <h2 >Page does not exist.</h2>
+    </div>
+  );
+};
 
-  render() {
-    return <div />;
-  }
-}
+export default Unauthorized;
