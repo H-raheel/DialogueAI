@@ -13,7 +13,7 @@ import withRoleProtection from "../../hoc/authWrap.jsx";
 function Assignments() {
   return (
     <>
-    
+    <AuthContextProvider>
       <Sidebar />
       <div className="relative md:ml-64 bg-white-100">
         <Header />
@@ -22,7 +22,7 @@ function Assignments() {
           <FooterAdmin />
         </div>
       </div>
-  
+      </AuthContextProvider>
     </>
   );
 }
