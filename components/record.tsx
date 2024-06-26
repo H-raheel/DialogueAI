@@ -168,11 +168,10 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   }, [chatid]);
 
   return (
-    <main className="flex flex-row min-h-screen justify-around py-1 px-4 fixed space-x-2">
-      <>
+    <main className="grid grid-cols-8 w-full mb h-screen">
+      <div className="col-span-6 bg-white " >
      
         <ChatMessages chatHistory={chatHistory} />
-     
         <div className="flex flex-col items-center w-full fixed bottom-0 pb-3">
           <button
             onClick={handleToggleRecording}
@@ -202,8 +201,12 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
             )}
           </button>
         </div>
-      </>
+       
+      </div>
+      <div className=" bg-gray-300 col-span-2">
       <ChatMessages chatHistory={chatHistory} />
+      </div>
+      
     </main>
   );
 }
