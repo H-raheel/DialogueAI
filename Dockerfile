@@ -15,9 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Install npm packages and build front-end
-RUN npm install
 RUN npm install yarn
-RUN npm run build
 
 #RUN npm run dev -- --host & \
 #    sleep 10 && \
@@ -30,7 +28,7 @@ pytest api/tests\n\
 kill \$(jobs -p)" > run_tests.sh && \
     chmod +x run_tests.sh
 # Expose necessary port
-EXPOSE 5000 3000 8000
+EXPOSE 5000 3001 8000 8888
 
 # Start flask app and run npm dev server
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "production", "--", "--host"]

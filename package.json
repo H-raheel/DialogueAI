@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "flask-dev": "pip3 install -r requirements.txt && cd api && waitress-serve --listen=0.0.0.0:5000 main:app",
-    "build": "npm install",
+    "build": "npm install && next build",
     "test": "pytest api/tests",
     "next-dev": "next dev -H 0.0.0.0 -p 3001",
+    "start": "npm run build && next start -p 3001 -H 0.0.0.0",
+    "production": "concurrently \"npm run start\" \"npm run flask-dev\"",
     "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\""
   },
   "keywords": [
