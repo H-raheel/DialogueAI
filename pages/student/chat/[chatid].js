@@ -2,11 +2,11 @@
 
 import { useRouter } from 'next/router';
 import { useState } from "react";
-import SpeechNavbar from "../../components/Navbars/speechNavbar.js";
-import MicrophoneComponent from '../../components/record';
-import { AuthContextProvider } from "../../context/AuthContext.js";
+import SpeechNavbar from "../../../components/Navbars/speechNavbar.js";
+import MicrophoneComponent from '../../../components/record.js';
+import withRoleProtection from '../../../hoc/authWrap.jsx';
 
-export default function Test() {
+ function Test() {
   const [loading, setLoading] = useState(true);
 
   const router = useRouter();
@@ -14,13 +14,15 @@ export default function Test() {
 
   return (
     <>
-      <AuthContextProvider>
+    
       {/* <Sidebar /> */}
       <div className="bg-black-100">
         <SpeechNavbar />
         <MicrophoneComponent chatid={chatid} />
       </div>
-      </AuthContextProvider>
+    
     </>
   );
 }
+
+export default withRoleProtection(Test, ['student'])

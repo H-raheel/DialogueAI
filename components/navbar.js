@@ -4,9 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/router';
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import ThemeChanger from "./DarkSwitch";
-
-import { UserAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const navigation = [
@@ -17,11 +16,11 @@ const Navbar = () => {
     "Blog",
   ]; 
   
-
- 
-   
+  const user = useSelector((state) => state.user);
+ const role=useSelector((state) => state.role);
+   console.log(user)
   const { theme, setTheme } = useTheme();
-  const { user, role } = UserAuth() || {};
+  // const { user, role } = UserAuth() || {};
   const [loading, setLoading] = useState(true);
  // const [role, setRole] = useState("");
  console.log(role)
@@ -165,7 +164,7 @@ const Navbar = () => {
           )
         )} */}
 {console.log(role)}
-
+{console.log(user)}
         {
           user===null?
         

@@ -5,7 +5,6 @@ import FooterAdmin from "../../components/Footers/FooterAdmin.js";
 import Header from "../../components/Headers/assignmentHeader.js";
 import Sidebar from "../../components/Sidebar/SidebarStudent.js";
 import CardTable from "../../components/Tables/AssignmentTable.js";
-import { AuthContextProvider } from "../../context/AuthContext.js";
 import withRoleProtection from "../../hoc/authWrap.jsx";
 
 
@@ -13,7 +12,7 @@ import withRoleProtection from "../../hoc/authWrap.jsx";
 function Assignments() {
   return (
     <>
-    <AuthContextProvider>
+   {/* <AuthContextProvider> */}
       <Sidebar />
       <div className="relative md:ml-64 bg-white-100">
         <Header />
@@ -22,7 +21,7 @@ function Assignments() {
           <FooterAdmin />
         </div>
       </div>
-      </AuthContextProvider>
+    {/* </AuthContextProvider> */}
     </>
   );
 }

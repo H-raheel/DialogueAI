@@ -43,7 +43,7 @@ export default function Navbar() {
           <p
             className="text-white text-sm uppercase hidden lg:inline-block font-semibold"
           >
-            Teacher Metrics Page
+            {/* Teacher Metrics Page */}
           </p>
           {/* Form */}
           <form className="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3">
