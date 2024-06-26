@@ -1,24 +1,34 @@
+import {
+  signOut
+} from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { auth } from "../../pages/api/firebase";
+import { removeUser } from "../../store/reducers/authSlice.js";
 import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
-import { UserAuth } from "../../context/AuthContext";
-import { auth } from "../../pages/api/firebase";
-import React, { useState, useEffect } from "react";
 
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const { user, googleSignIn, logOut } = UserAuth() || {};
+  const dispatch=useDispatch()
+  const logOut =  () => {
+    signOut(auth).then(() => {
+      console.log("logging ")
+    dispatch(removeUser())
+    });
+  };
   const handleSignOut = async (event) => {
-    console.log('debug')
+
+    console.log('debug loggingout');
     try {
         event.preventDefault();
-        await logOut();
-        router.push("/");
+  logOut();
+
     }
     catch (error) {
         console.log(error);
@@ -31,37 +41,37 @@ export default function Sidebar() {
     }
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(true);
-        return;
-      }
-      setLoading(true);
-      const uid = user.uid;
-      try {
-        const response = await fetch('/api/get_role', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ uid }),
-        });
-        const fetchedData = await response.json();
-        var data = fetchedData['role'];
-        if (data != 'student') {
-          router.push('/');
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!user) {
+  //       setLoading(true);
+  //       return;
+  //     }
+  //     setLoading(true);
+  //     const uid = user.uid;
+  //     try {
+  //       const response = await fetch('/api/get_role', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         body: JSON.stringify({ uid }),
+  //       });
+  //       const fetchedData = await response.json();
+  //       var data = fetchedData['role'];
+  //       if (data != 'student') {
+  //         router.push('/');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData(); // Call fetchData when the component mounts
-  }, [user]);
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [user]);
 
   return (
     <>
@@ -140,7 +150,7 @@ export default function Sidebar() {
             <hr className="my-4 md:min-w-full" />
             {/* Heading */}
             <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Student Pages
+              Student 
             </h6>
             {/* Navigation */}
 
@@ -155,7 +165,7 @@ export default function Sidebar() {
                     <i
                       className={
                         "fas fa-tv mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/dashboard") !== -1
+                        (router.pathname.indexOf("/student/dashboard") !== -1
                           ? "opacity-75"
                           : "text-blueGray-300")
                       }
@@ -216,32 +226,33 @@ export default function Sidebar() {
             {/* Divider */}
             <hr className="my-4 md:min-w-full" />
             {/* Heading */}
-            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+            {/* <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
               Personal Related
-            </h6>
+            </h6> */}
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-              <li className="items-center">
-                <Link href="/landing" legacyBehavior>
-                  <a
-                    href="#pablo"
-                    className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-                  >
-                    <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Landing Page
-                  </a>
-                </Link>
-              </li>
+            
 
               <li className="items-center">
-                <Link href="/profile" legacyBehavior>
+                <Link href="/student/profile" legacyBehavior>
                   <a
                     href="#pablo"
                     className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
                   >
                     <i className="fas fa-user-circle text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Profile Page
+                    Profile 
+                  </a>
+                </Link>
+              </li>
+              <li className="items-center">
+                <Link href="/" legacyBehavior>
+                  <a
+                    href="#pablo"
+                    className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                  >
+                    <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
+                   About Us
                   </a>
                 </Link>
               </li>

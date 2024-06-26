@@ -1,14 +1,13 @@
 import React from "react";
 
 // components
-
 import CardTable from "../../components/Cards/CardTableS.js";
 
 // layout for page
-
 import Admin from "../../components/Admin.js";
+import withRoleProtection from "../../hoc/authWrap.jsx";
 
-export default function Tables() {
+function Tables() {
   return (
     <>
       <div className="flex flex-wrap mt-4">
@@ -21,3 +20,5 @@ export default function Tables() {
 }
 
 Tables.layout = Admin("student");
+
+export default withRoleProtection(Tables, ['student']);

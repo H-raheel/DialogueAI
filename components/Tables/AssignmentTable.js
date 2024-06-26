@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { UserAuth } from "../../context/AuthContext";
 import Link from "next/link";
+import PropTypes from "prop-types";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 // components
-import TableDropdown from "../Dropdowns/TableDropdown.js";
 
 export default function AssignmentTable({ role, color }) {
   let href;
@@ -15,15 +14,18 @@ export default function AssignmentTable({ role, color }) {
   }
 
   const [assignments, setAssignments] = useState([]);
-  const { user } = UserAuth();
+  const [loading,setLoading]=useState(false);
 
+
+  const uid = useSelector((state) => state.user);
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) {
+      if (!uid) {
         return;
       }
-      const uid = user.uid;
+      
       try {
+        setLoading(true)
         const response = await fetch("/api/getAssignments", {
           method: "POST",
           headers: {
@@ -34,13 +36,16 @@ export default function AssignmentTable({ role, color }) {
         });
         const fetchedData = await response.json();
         const data = fetchedData["result"];
+        console.log(data)
+        setLoading(false)
         setAssignments(data);
       } catch (error) {
+        setLoading(false);
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
-  }, [user]);
+  }, [uid]);
 
   //<td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
   //<TableDropdown />
@@ -78,6 +83,7 @@ export default function AssignmentTable({ role, color }) {
         </div>
         <div className="block w-full overflow-x-auto">
           {/* Projects table */}
+          
           <table className="items-center w-full bg-transparent border-collapse">
             <thead>
               <tr>
@@ -132,7 +138,14 @@ export default function AssignmentTable({ role, color }) {
               </tr>
             </thead>
             <tbody>
-              {assignments.map((assignment, index) => (
+                {loading ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-4">
+                    <h2>Loading...</h2>
+                  </td>
+                </tr>
+              ) : (
+              assignments.map((assignment, index) => (
                 <tr key={index}>
                   <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
                     <img
@@ -164,7 +177,7 @@ export default function AssignmentTable({ role, color }) {
                     </Link>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

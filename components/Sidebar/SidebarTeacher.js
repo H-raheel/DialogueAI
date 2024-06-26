@@ -1,39 +1,48 @@
-import React from "react";
+import {
+  signOut
+} from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
-import { UserAuth } from "../../context/AuthContext";
+import React from "react";
+import { useDispatch } from "react-redux";
 import { auth } from "../../pages/api/firebase";
-import { useEffect } from "react";
-
+import { removeUser } from "../../store/reducers/authSlice.js";
 import NotificationDropdown from "../Dropdowns/NotificationDropdown.js";
 import UserDropdown from "../Dropdowns/UserDropdown.js";
 
 export default function Sidebar() {
-  const { user, googleSignIn, logOut } = UserAuth() || {};
+//  const { user, googleSignIn, logOut } = UserAuth() || {};
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
   const [loading, setLoading] = React.useState(true);
+const dispatch=useDispatch()
+  const logOut =  () => {
+    signOut(auth).then(() => {
+      console.log("logging ")
+    dispatch(removeUser())
+    });
+  };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!user) {
+  //       setLoading(true);
+  //       return;
+  //     }
+  //     setLoading(true);
+  //     const uid = user.uid;
+  //   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(true);
-        return;
-      }
-      setLoading(true);
-      const uid = user.uid;
-    };
-
-    fetchData(); // Call fetchData when the component mounts
-  }, [user]);
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [user]);
 
   const handleSignOut = async (event) => {
-    console.log('debug', logOut)
+
+    console.log('debug loggingout');
     try {
         event.preventDefault();
-        await logOut();
+  logOut();
+
     }
     catch (error) {
         console.log(error);
@@ -125,22 +134,22 @@ export default function Sidebar() {
             <hr className="my-4 md:min-w-full" />
             {/* Heading */}
             <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Teacher Admin Pages
+              Teacher 
             </h6>
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
               <li className="items-center">
-                <Link href="/admin/dashboard" className={
+                <Link href="/teacher/dashboard" className={
                       "text-xs uppercase py-3 font-bold block " +
-                      (router.pathname.indexOf("/admin/dashboard") !== -1
+                      (router.pathname.indexOf("/teacher/dashboard") !== -1
                         ? "text-lightBlue-500 hover:text-lightBlue-600"
                         : "text-blueGray-700 hover:text-blueGray-500")
                     }>
                     <i
                       className={
                         "fas fa-tv mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/dashboard") !== -1
+                        (router.pathname.indexOf("/teacher/dashboard") !== -1
                           ? "opacity-75"
                           : "text-blueGray-300")
                       }
@@ -150,12 +159,12 @@ export default function Sidebar() {
               </li>
 
               <li className="items-center">
-                <Link legacyBehavior href="/admin/settings">
+                <Link legacyBehavior href="/teacher/settings">
                   <a
                     href="#pablo"
                     className={
                       "text-xs uppercase py-3 font-bold block " +
-                      (router.pathname.indexOf("/admin/settings") !== -1
+                      (router.pathname.indexOf("/teacher/settings") !== -1
                         ? "text-lightBlue-500 hover:text-lightBlue-600"
                         : "text-blueGray-700 hover:text-blueGray-500")
                     }
@@ -163,7 +172,7 @@ export default function Sidebar() {
                     <i
                       className={
                         "fas fa-tools mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/settings") !== -1
+                        (router.pathname.indexOf("/teacher/settings") !== -1
                           ? "opacity-75"
                           : "text-blueGray-300")
                       }
@@ -174,12 +183,12 @@ export default function Sidebar() {
               </li>
 
               <li className="items-center">
-                <Link href="/admin/tables" legacyBehavior>
+                <Link href="/teacher/tables" legacyBehavior>
                   <a
                     href="#pablo"
                     className={
                       "text-xs uppercase py-3 font-bold block " +
-                      (router.pathname.indexOf("/admin/tables") !== -1
+                      (router.pathname.indexOf("/teacher/tables") !== -1
                         ? "text-lightBlue-500 hover:text-lightBlue-600"
                         : "text-blueGray-700 hover:text-blueGray-500")
                     }
@@ -187,12 +196,36 @@ export default function Sidebar() {
                     <i
                       className={
                         "fas fa-table mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/tables") !== -1
+                        (router.pathname.indexOf("/teacher/tables") !== -1
                           ? "opacity-75"
                           : "text-blueGray-300")
                       }
                     ></i>{" "}
-                    Tables
+                  Assignments
+                  </a>
+                </Link>
+              </li>
+
+              <li className="items-center">
+                <Link href="/teacher/assign" legacyBehavior>
+                  <a
+                    href="#pablo"
+                    className={
+                      "text-xs uppercase py-3 font-bold block " +
+                      (router.pathname.indexOf("/teacher/assign") !== -1
+                        ? "text-lightBlue-500 hover:text-lightBlue-600"
+                        : "text-blueGray-700 hover:text-blueGray-500")
+                    }
+                  >
+                    <i
+                      className={
+                        "fas fa-folder mr-2 text-sm " +
+                        (router.pathname.indexOf("/teacher/assign") !== -1
+                          ? "opacity-75"
+                          : "text-blueGray-300")
+                      }
+                    ></i>{" "}
+                Create Assignment
                   </a>
                 </Link>
               </li>
@@ -201,32 +234,34 @@ export default function Sidebar() {
             {/* Divider */}
             <hr className="my-4 md:min-w-full" />
             {/* Heading */}
-            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+            {/* <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
               Personal Related
-            </h6>
+            </h6> */}
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-              <li className="items-center">
-                <Link href="/landing" legacyBehavior>
-                  <a
-                    href="#pablo"
-                    className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-                  >
-                    <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Landing Page
-                  </a>
-                </Link>
-              </li>
+              
 
               <li className="items-center">
-                <Link href="/profile" legacyBehavior>
+                <Link href="/teacher/profile" legacyBehavior>
                   <a
                     href="#pablo"
                     className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
                   >
                     <i className="fas fa-user-circle text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Profile Page
+                    Profile 
+                  </a>
+                </Link>
+              </li>
+
+              <li className="items-center">
+                <Link href="/" legacyBehavior>
+                  <a
+                    href="#pablo"
+                    className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                  >
+                    <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
+                   About Us
                   </a>
                 </Link>
               </li>

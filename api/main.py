@@ -8,8 +8,9 @@ from __init__ import envs
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import os
-
-from langchain.chat_models import ChatOpenAI
+load_dotenv()
+from langchain_openai import ChatOpenAI
+# from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationSummaryBufferMemory
 import speech_recognition as sr

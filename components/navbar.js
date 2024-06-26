@@ -1,13 +1,11 @@
-import Link from "next/link";
-import ThemeChanger from "./DarkSwitch";
-import Image from "next/image"
 import { Disclosure } from "@headlessui/react";
-import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/router';
 import { useTheme } from "next-themes";
-import { auth } from "../pages/api/firebase";
-
-import { UserAuth } from "../context/AuthContext";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from 'next/router';
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import ThemeChanger from "./DarkSwitch";
 
 const Navbar = () => {
   const navigation = [
@@ -17,11 +15,15 @@ const Navbar = () => {
     "Company",
     "Blog",
   ]; 
-
+  
+  const user = useSelector((state) => state.user);
+ const role=useSelector((state) => state.role);
+   console.log(user)
   const { theme, setTheme } = useTheme();
-  const { user, googleSignIn, logOut } = UserAuth() || {};
+  // const { user, role } = UserAuth() || {};
   const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState("");
+ // const [role, setRole] = useState("");
+ console.log(role)
   const router = useRouter();
   const handleSignIn = async (event) => {
     try {
@@ -33,41 +35,41 @@ const Navbar = () => {
     } 
   }
 
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      setLoading(false);
-    };
+  // useEffect(() => {
+  //   const checkAuthentication = async () => {
+  //     await new Promise((resolve) => setTimeout(resolve, 50));
+  //     setLoading(false);
+  //   };
 
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(true);
-        return;
-      }
-      setLoading(true);
-      const uid = user.uid;
-      try {
-        const response = await fetch('/api/get_role', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ uid }),
-        });
-        const fetchedData = await response.json();
-        var data = fetchedData['role'];
-        console.log('data:', data);
-        setRole(data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuthentication();
-    fetchData();
-  }, [user]);
+  //   const fetchData = async () => {
+  //     if (!user) {
+  //       setLoading(true);
+  //       return;
+  //     }
+  //     setLoading(true);
+  //     const uid = user.uid;
+  //     try {
+  //       const response = await fetch('/api/get_role', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         body: JSON.stringify({ uid }),
+  //       });
+  //       const fetchedData = await response.json();
+  //       var data = fetchedData['role'];
+  //       console.log('data:', data);
+  //       setRole(data);
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   checkAuthentication();
+  //   fetchData();
+  // }, [user]);
 
   return (
     <div className="w-full">
@@ -122,7 +124,7 @@ const Navbar = () => {
                           {item}
                       </Link>
                     ))}
-                    <Link href="/register" className="w-full px-6 py-2 mt-3 text-center text-white bg-indigo-600 rounded-md lg:ml-5">         
+                    <Link href="/login" className="w-full px-6 py-2 mt-3 text-center text-white bg-indigo-600 rounded-md lg:ml-5">         
                         Get Started
                     </Link>
                   </>
@@ -146,7 +148,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden mr-3 space-x-4 lg:flex nav__item">
-        {loading ? null : !user ? (
+        {/* {loading ? null : !user ? (
           <Link href="/login" className="px-6 py-2 text-white bg-indigo-600 rounded-md md:ml-5">
             Get Started
           </Link>
@@ -160,7 +162,19 @@ const Navbar = () => {
               Dashboard
             </Link>
           )
-        )}
+        )} */}
+{console.log(role)}
+{console.log(user)}
+        {
+          user===null?
+        
+          <Link href="/login" className="px-6 py-2 text-white bg-indigo-600 rounded-md md:ml-5">
+            Get Started
+          </Link>:
+          <Link href={`/${role}/dashboard`} className="px-6 py-2 text-white bg-indigo-600 rounded-md md:ml-5">
+          Dashboard
+        </Link>
+        }
           <ThemeChanger />
         </div>
       </nav>
