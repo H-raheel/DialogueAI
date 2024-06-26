@@ -1,23 +1,22 @@
 import React from "react";
 
 // components
-import Assignment from "../../components/assignment.js";
-import AdminNavbar from "../../components/Navbars/TeacherNavbar.js";
 import Sidebar from "../../components/Sidebar/SidebarTeacher.js";
-import HeaderStats from "../../components/Headers/HeaderStats.js";
-import FooterAdmin from "../../components/Footers/FooterAdmin.js";
-import { AuthContextProvider } from "../../context/AuthContext.js";
-
-export default function AssignPage() {
+import Assignment from "../../components/assignment.js";
+import withRoleProtection from "../../hoc/authWrap.jsx";
+function AssignPage() {
 
     return (
       <>
-        <AuthContextProvider>
+        {/* <AuthContextProvider> */}
         <Sidebar />
         <div className="relative md:ml-64 bg-blueGray-100">
           <Assignment />
         </div>
-        </AuthContextProvider>
+        {/* </AuthContextProvider> */}
       </>
     );
   }
+
+
+  export default withRoleProtection(AssignPage,["teacher"])

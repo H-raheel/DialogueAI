@@ -1,20 +1,26 @@
-import { ThemeProvider } from "next-themes";
-import "../styles/tailwind.css";
-import PageChange from "components/PageChange/PageChange.js";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import 'regenerator-runtime/runtime'
-
+import { ThemeProvider } from "next-themes";
 import React from "react";
-import ReactDOM from "react-dom";
-import App from "next/app";
-import Head from "next/head";
-import Router from "next/router";
+import { Provider } from 'react-redux';
+import { persistStore } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
+import 'regenerator-runtime/runtime';
+import { store } from 'store';
+
+import "../styles/tailwind.css";
+
 
 function MyApp({ Component, pageProps }) {
+  const persistor = persistStore(store);
+
   return (
-    <ThemeProvider attribute="class">
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+      <ThemeProvider attribute="class">
+        <Component {...pageProps} />
+      </ThemeProvider>
+      </PersistGate>
+    </Provider>
   );
 }
 

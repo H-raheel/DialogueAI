@@ -1,17 +1,18 @@
 import React from "react";
 
 // components
-import Dashboard from "../../components/dashboard.js";
-import Sidebar from "../../components/Sidebar/SidebarStudent.js";
-import Header from "../../components/Headers/assignmentHeader.js";
 import FooterAdmin from "../../components/Footers/FooterAdmin.js";
-import { AuthContextProvider } from "../../context/AuthContext.js";
+import Header from "../../components/Headers/assignmentHeader.js";
+import Sidebar from "../../components/Sidebar/SidebarStudent.js";
 import CardTable from "../../components/Tables/AssignmentTable.js";
+import withRoleProtection from "../../hoc/authWrap.jsx";
 
-export default function StudentDashboard() {
+
+
+function Assignments() {
   return (
     <>
-    <AuthContextProvider>
+   {/* <AuthContextProvider> */}
       <Sidebar />
       <div className="relative md:ml-64 bg-white-100">
         <Header />
@@ -20,7 +21,9 @@ export default function StudentDashboard() {
           <FooterAdmin />
         </div>
       </div>
-    </AuthContextProvider>
+    {/* </AuthContextProvider> */}
     </>
   );
 }
+
+export default withRoleProtection(Assignments,['student'])

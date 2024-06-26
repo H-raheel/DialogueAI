@@ -1,7 +1,6 @@
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import { UserAuth } from "../../context/AuthContext.js";
-import UserDropdown from "../Dropdowns/UserDropdown.js";
-import React, { useState, useEffect } from "react";
-
 export default function SpeechNavbar() {
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const [loading, setLoading] = useState(true);
@@ -48,14 +47,21 @@ export default function SpeechNavbar() {
           <p
             className="text-white text-sm uppercase hidden lg:inline-block font-semibold"
           >
-            Dialogue Practice Page
+           Assignment Name here
           </p>
           {/* Form */}
           <form className="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3">
             <div className="relative flex w-full flex-wrap items-stretch">
-
+            <Link href="/student/assignments">
+            <button
+              className="bg-blueGray-700 active:bg-blueGray-600 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+              type="button"
+            >
+              Back
+            </button>
+          </Link>
             </div>
-            <select name="class" id="class">
+            {/* <select name="class" id="class">
               <option disabled>Choose an assignment</option>
               {((assignments && assignments.length === 0) || !assignments) ? (
                 <option disabled selected>No assignments available</option>
@@ -64,7 +70,7 @@ export default function SpeechNavbar() {
                   <option value={assignment.class}>{assignment.name}</option>
                 ))
               )}
-            </select>
+            </select> */}
           </form>
           {/* User */}
         </div>
