@@ -14,11 +14,10 @@ import logging
 import pyaudio
 import wave
 
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationSummaryBufferMemory, ConversationBufferMemory
 import speech_recognition as sr
-from langchain.callbacks import get_openai_callback
 
 # Import the logger from the main module
 logger = logging.getLogger(__name__)
@@ -35,12 +34,12 @@ client = OpenAI(
 )
 
 prompt_file = open("system_instructions/language_expert.txt", "r").read()
-prompt_template = PromptTemplate(input_variables=["history", "input", "adjective"], template=prompt_file)
+prompt_template = PromptTemplate(template=prompt_file)
 
 conversation = ConversationChain(
     llm=chat,
-    verbose=False,
-    prompt=prompt_template
+    verbose=False
+    # prompt=prompt_template
 )
 def connect():
     global db, client
@@ -138,12 +137,14 @@ def getChatIds():
 
 @app.route('/api/openChat', methods=['GET', 'POST'])
 def openChat():
+    print("Inside openachat")
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
     result = db.find({ "_id": obj })
     result = result[0]
+    print(f"result = {result}")
     assignmentid = result['assignment_id']
     userid = result['user_id']
 
