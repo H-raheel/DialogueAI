@@ -15,7 +15,7 @@ export default function HeaderStats(role) {
             <div className="flex flex-wrap">
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle={role=="teacher"?"Total Students":"Languages Taken"}
+                  statSubtitle={role=="teacher"?"Total Classes":"Language"}
                   statTitle={role=="teacher"?"120":"5"}
                   statArrow=""
                   statPercent=""
@@ -27,7 +27,7 @@ export default function HeaderStats(role) {
               </div>
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle={role=="teacher"?"Total Due Assignments":"Assignments Pending"}
+                  statSubtitle={role=="teacher"?"Total Due Assignments":"Assignments Given"}
                   statTitle="12"
                   statArrow=""
                   statPercent=""
@@ -49,8 +49,8 @@ export default function HeaderStats(role) {
                   statIconColor="bg-pink-500"
                 /> */}
                 <CardStats
-                  statSubtitle="Best Performing Language"
-                  statTitle="English"
+                  statSubtitle="Best Performing Class"
+                  statTitle="2A"
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -61,8 +61,8 @@ export default function HeaderStats(role) {
               </div>
               <div className="font-light w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle="Worst Performing Language"
-                  statTitle="German"
+                  statSubtitle="Worst Performing Class"
+                  statTitle="2C"
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"

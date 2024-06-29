@@ -2,76 +2,103 @@ import Chart from "chart.js/auto";
 import React from "react";
 
 export default function CardBarChart({role}) {
+  const data={
+    "labels": [
+      "assignment1",
+      "assignment2",
+      "assignment3",
+      "assignment4",
+      "assignment5",
+      "assignment6",
+     
+    ],
+    "Grammer Mistakes": [50, 62, 70, 58, 65,50],
+    "Vocabulary Mistakes": [30, 40, 35, 45, 50,50],
+    "Tone Mistakes": [20, 25, 30, 35, 40,50],
+    // "Grammer Correct": [70, 80, 75, 85, 90,50],
+    // "Vocabulary Correct": [60, 70, 65, 75, 80,50],
+    // "Tone Correct": [50, 60, 55, 65, 70,50]
+  }
   React.useEffect(() => {
     let config = {
       type: "bar",
       data: {
-        labels: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
+        labels: data["labels"],
+        datasets: [
+          {
+            label: "Grammar Mistakes",
+            backgroundColor: "rgba(54, 162, 235, 0.7)", // Bright blue
+            borderColor: "rgba(54, 162, 235, 1)",
+            data: data["Grammer Mistakes"],
+            borderWidth: 1,
+            barThickness: 20, // Thicker bars
+            maxBarThickness: 30, // Maximum thickness for better spacing
+          },
+          {
+            label: "Vocabulary Mistakes",
+            backgroundColor: "rgba(255, 99, 132, 0.7)", // Bright red
+            borderColor: "rgba(255, 99, 132, 1)",
+            data: data["Vocabulary Mistakes"],
+            borderWidth: 1,
+            barThickness: 20,
+            maxBarThickness: 30,
+          },
+          {
+            label: "Tone Mistakes",
+            backgroundColor: "rgba(255, 206, 86, 0.7)", // Bright yellow
+            borderColor: "rgba(255, 206, 86, 1)",
+            data: data["Tone Mistakes"],
+            borderWidth: 1,
+            barThickness: 20,
+            maxBarThickness: 30,
+          },
+          // {
+          //   label: "Grammar Correct",
+          //   backgroundColor: "rgba(75, 192, 192, 0.7)", // Bright teal
+          //   borderColor: "rgba(75, 192, 192, 1)",
+          //   data: data["Grammer Correct"],
+          //   borderWidth: 1,
+          //   barThickness: 20,
+          //   maxBarThickness: 30,
+          // },
+          // {
+          //   label: "Vocabulary Correct",
+          //   backgroundColor: "rgba(153, 102, 255, 0.7)", // Bright purple
+          //   borderColor: "rgba(153, 102, 255, 1)",
+          //   data: data["Vocabulary Correct"],
+          //   borderWidth: 1,
+          //   barThickness: 20,
+          //   maxBarThickness: 30,
+          // },
+          // {
+          //   label: "Tone Correct",
+          //   backgroundColor: "rgba(255, 159, 64, 0.7)", // Bright orange
+          //   borderColor: "rgba(255, 159, 64, 1)",
+          //   data: data["Tone Correct"],
+          //   borderWidth: 1,
+          //   barThickness: 20,
+          //   maxBarThickness: 30,
+          // }
         ],
-       
-          datasets: [
-           
-            // Additional datasets for languages
-            {
-              label: "English",
-              backgroundColor: "rgba(75, 81, 191, 0.5)",
-              borderColor: "rgba(75, 81, 191, 1)",
-              data: [50, 62, 70, 58, 55, 63, 70],
-              fill: false,
-              barThickness: 5,
-            },
-            {
-              label: "Japanese",
-              backgroundColor: "rgba(255, 193, 7, 0.5)",
-              borderColor: "rgba(255, 193, 7, 1)",
-              data: [42, 54, 65, 49, 45, 55, 62],
-              fill: false,
-              barThickness: 5,
-            },
-            {
-              label: "Spanish",
-              backgroundColor: "rgba(54, 162, 235, 0.5)",
-              borderColor: "rgba(54, 162, 235, 1)",
-              data: [38, 48, 55, 42, 40, 50, 58],
-              fill: false,
-              barThickness: 5,
-            },
-            {
-              label: "Portuguese",
-              backgroundColor: "rgba(255, 99, 132, 0.5)",
-              borderColor: "rgba(255, 99, 132, 1)",
-              data: [30, 40, 45, 35, 32, 42, 50],
-              fill: false,
-              barThickness: 5,
-            },
-            {
-              label: "German",
-              backgroundColor: "rgba(153, 102, 255, 0.5)",
-              borderColor: "rgba(153, 102, 255, 1)",
-              data: [25, 30, 38, 28, 25, 32, 40],
-              fill: false,
-              barThickness: 5,
-            },
-          ],
-        
       },
       options: {
         maintainAspectRatio: false,
         responsive: true,
         title: {
-          display: false,
-          text: "Orders Chart",
+          display: true,
+          text: "Performance Chart",
+          fontSize: 16,
+          fontColor: "#333",
+          padding: 20,
         },
         tooltips: {
           mode: "index",
           intersect: false,
+          backgroundColor: "rgba(0,0,0,0.8)",
+          titleFontColor: "#fff",
+          bodyFontColor: "#fff",
+          xPadding: 10,
+          yPadding: 10,
         },
         hover: {
           mode: "nearest",
@@ -79,50 +106,60 @@ export default function CardBarChart({role}) {
         },
         legend: {
           labels: {
-            fontColor: "rgba(0,0,0,.4)",
+            fontColor: "#333",
+            usePointStyle: true,
           },
-          align: "end",
-          position: "bottom",
+          align: "start",
+          position: "top",
         },
         scales: {
           xAxes: [
             {
-              display: false,
+              display: true,
               scaleLabel: {
                 display: true,
-                labelString: "Month",
+                labelString: "Assignments",
+                fontColor: "#333",
+                fontSize: 14,
               },
               gridLines: {
-                borderDash: [2],
-                borderDashOffset: [2],
-                color: "rgba(33, 37, 41, 0.3)",
-                zeroLineColor: "rgba(33, 37, 41, 0.3)",
-                zeroLineBorderDash: [2],
-                zeroLineBorderDashOffset: [2],
+                color: "rgba(200, 200, 200, 0.2)",
+                zeroLineColor: "rgba(200, 200, 200, 0.4)",
               },
+              barPercentage: 0.8, // Add spacing between bars
+              categoryPercentage: 0.5, // Space out bar categories
             },
           ],
           yAxes: [
             {
               display: true,
               scaleLabel: {
-                display: false,
-                labelString: "Value",
+                display: true,
+                labelString: "Mistakes / Corrections",
+                fontColor: "#333",
+                fontSize: 14,
               },
               gridLines: {
-                borderDash: [2],
-                drawBorder: false,
-                borderDashOffset: [2],
-                color: "rgba(33, 37, 41, 0.2)",
-                zeroLineColor: "rgba(33, 37, 41, 0.15)",
-                zeroLineBorderDash: [2],
-                zeroLineBorderDashOffset: [2],
+                color: "rgba(200, 200, 200, 0.2)",
+                zeroLineColor: "rgba(200, 200, 200, 0.4)",
               },
             },
           ],
         },
+        layout: {
+          padding: {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10,
+          },
+        },
       },
     };
+    
+    // Assuming ctx is the 2D drawing context of the canvas
+    
+    
     let ctx = document.getElementById("bar-chart").getContext("2d");
     window.myBar = new Chart(ctx, config);
   }, []);
@@ -133,10 +170,10 @@ export default function CardBarChart({role}) {
           <div className="flex flex-wrap items-center">
             <div className="relative w-full max-w-full flex-grow flex-1">
               <h6 className="uppercase text-blueGray-400 mb-1 text-xs font-semibold">
-              Assignments
+          Performance
               </h6>
               <h2 className="text-blueGray-700 text-xl font-semibold">
-               {role=="Student"? "Assignments Submitted":" Assignments Given"}
+              Overall Performance In Assignments
               </h2>
             </div>
           </div>

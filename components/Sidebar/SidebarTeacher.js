@@ -158,7 +158,7 @@ const dispatch=useDispatch()
                 </Link>
               </li>
 
-              <li className="items-center">
+              {/* <li className="items-center">
                 <Link legacyBehavior href="/teacher/settings">
                   <a
                     href="#pablo"
@@ -180,7 +180,7 @@ const dispatch=useDispatch()
                     Settings
                   </a>
                 </Link>
-              </li>
+              </li> */}
 
               <li className="items-center">
                 <Link href="/teacher/tables" legacyBehavior>
