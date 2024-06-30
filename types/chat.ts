@@ -7,6 +7,10 @@ export interface Message {
   content: string;
 }
 
+export interface immediateFeedback {
+ // role: typeof userRole | typeof botRole;
+  content: string;
+}
 export interface ChatId {
   chatid: string;
 }
@@ -20,6 +24,7 @@ export interface StoreApiKeysProps {
 
 export interface ChatMessagesProps {
   chatHistory: Message[];
+  feedback:immediateFeedback[];
 }
 
 export interface ChatInputProps {

@@ -19,6 +19,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   const [sentTranscription,setSentTranscription]=useState("")
   const [botMessage, setBotMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<any>([]);
+  const [feedback, setfeedback] = useState<any>([]);
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const recognitionRef = useRef<any>(null);
    const [showProgress, setShowProgress] = useState(false);
@@ -91,10 +92,11 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
           body: JSON.stringify({ output_filename: "test.wav",
         record_seconds:4 }),
         });
-        const transcription = await response.json();  
-        fulltranscript.push(transcription.transcription)
-        console.log(transcription)
-        setSentTranscription(transcription.transcript)// Assume response is in JSON format
+        const data= await response.json();  
+        fulltranscript.push(data.transcription)
+        console.log("trans fethed",data)
+        console.log("inside",data.transcription)
+       setSentTranscription(data.transcription)
         console.log('Transcription over heree:', sentTranscription);
       console.log(fulltranscript)
       console.log("data is set noww")
@@ -148,6 +150,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
     setIsRecording(false)
     console.log("recstopped")
     console.log(fulltranscript)
+
    // if (recognitionRef.current) {
       // recognitionRef.current.stop();
       setRecordingComplete(true);
@@ -174,13 +177,47 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
             chatHistory.push({ role: "AI", content: message });
           }
           console.log('chatHistory:', chatHistory)
-          setTranscript([]);
+         
           setBotMessage("");
         } catch (error) {
           console.error('Error fetching data:', error);
         } 
       }
-  await   fetchData();
+      const fetchFeedback = async () => {
+        try {
+          console.log("sending",fulltranscript[0])
+          const response = await fetch('/api/immediate_feedback', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify({"text":fulltranscript[0]}),
+          });
+          const fetchedData = await response.json();
+          console.log("fetched data",fetchedData)
+          feedback.push({content:fetchedData.feedback})
+          console.log(feedback)
+          setTranscript([]);
+          //let feedback = fetchedData['response'];
+          
+         // console.log('message1:', message)
+        //  console.log('totalTranscript2:', totalTranscript)
+       //   console.log('botMessage:', botMessage)
+          // if (totalTranscript != "" && message != "") {
+          //   chatHistory.push({ role: "Human", content: totalTranscript });
+          //   chatHistory.push({ role: "AI", content: message });
+          // }
+        //  console.log('chatHistory:', chatHistory)
+          // setTranscript([]);
+          // setBotMessage("");
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } 
+      }
+         await fetchData();
+         await fetchFeedback();
+
       /*
       console.log('totalTranscript2:', totalTranscript)
       console.log('botMessage:', botMessage)
@@ -234,7 +271,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
     <main className="  mb-7 h-screen w-screen bg-">
       <div className=" bg-white " >
      
-        <ChatMessages chatHistory={chatHistory} />
+        <ChatMessages chatHistory={chatHistory} feedback={feedback} />
         <div className="flex flex-col items-center w-full fixed bottom-0 pb-3">
           <button
             onClick={startRecording}
