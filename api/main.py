@@ -29,7 +29,7 @@ openaiKey = os.getenv("OPENAI_API_KEY")
 chat = ChatOpenAI(openai_api_key=openaiKey, model_name="gpt-3.5-turbo")
 
 # Create OpenAI client for calling ChatCompletion API
-client = OpenAI(
+openai_client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 
@@ -42,20 +42,20 @@ conversation = ConversationChain(
     # prompt=prompt_template
 )
 def connect():
-    global db, client
+    global db, mongodb_client
     """
     code for connecting to the cluster
     """
     uri = envs['uri']
 
     # Create a new client and connect to the server
-    client = MongoClient(uri)
+    mongodb_client = MongoClient(uri)
     # Send a ping to confirm a successful connection
     try:
-        client.admin.command('ping')
+        mongodb_client.admin.command('ping')
     except Exception as e:
         print(e)
-    db = client
+    db = mongodb_client
     return db
 
 
@@ -392,7 +392,7 @@ def feedback():
     data = request.get_json()
     text = data.get('text')
 
-    response: ChatCompletion = client.chat.completions.create(
+    response: ChatCompletion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": f"{prompt_file}"},
@@ -471,7 +471,57 @@ def record_voice():
     return transcription
     # transcription = transcribe(output_filename)
     # return jsonify({"transcription": transcription})
+"""
+Saves the recorded audio from record_voice.py to api/recordings/ directory.
+TODO: Use this api to record voice, instead of record_voice.py
+"""
+@app.route('/record', methods=['POST'])
+def record():
+    print("Inside record api call")
+    # Simulate recording by saving the uploaded file
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    file.save(os.path.join('recordings', file.filename))
+    return jsonify({"message": "File saved successfully"}), 200
+
+@app.route('/api/getAssignmentFeedback', methods=['GET', 'POST'])
+def getAssignmentFeedback():
+    db = connect().Chat.session
+    req = request.get_json()
+    chatid = req['chatid']
+    obj = ObjectId(chatid)
+    find = db.find({ "_id": obj })
+    find = find[0]
+    chat = find["chat"]
+    prompt = """
+    You are a language expert. 
+    You will be given a conversation between human and an AI. 
+    Your task is to provide insightful feedback ONLY for the human messages.
+    The feedback MUST consist of grammatical feedback, vocabulary feedback and tone feedback and must be addressed to the human.
+
+    Your response should be in a json format of {'grammatical': (grammatical feedback), 'vocabulary': (vocabulary feedback), 'tone': (tone feedback)}.
+    Put a newline in between every point in each feedback to separate them.
+    """
+    response: ChatCompletion = openai_client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": f"Chat Logs:\n{chat}"}
+        ],
+        max_tokens=1000
+    )
+    feedback = response.choices[0].message.content
+    print('feedback:', feedback)
+    feedback = eval(feedback)
+
+    return {'feedback': feedback}
+
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8888, host='0.0.0.0')
+    app.run(debug=True, port=5000, host='0.0.0.0')
 
