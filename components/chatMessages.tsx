@@ -58,8 +58,8 @@ export default function ChatMessages({ chatHistory,feedback }: ChatMessagesProps
               </div>
             ) : ( */}
               <div className="flex mb-2 lg:mb-4">
-                <Image src="/face.svg" alt="Face Icon" width={18} height={18} priority />
-                <span className="ml-2 text-md lg:text-lg font-semibold text-teal-500">You:</span>
+                {/* <Image src="/face.svg" alt="Face Icon" width={18} height={18} priority /> */}
+                <span className="ml-2 text-md lg:text-lg font-semibold text-red-700">Feedback:</span>
               </div>
             {/* )} */}
             <span className="text-md lg:text-lg">{message.content}</span>
