@@ -1,4 +1,5 @@
 from flask import Flask, request, flash, jsonify
+from langchain_core.prompts import PromptTemplate
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
@@ -9,12 +10,17 @@ from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import os
 load_dotenv()
+import logging
+import pyaudio
+import wave
+
 from langchain_openai import ChatOpenAI
-# from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.memory import ConversationSummaryBufferMemory, ConversationBufferMemory
 import speech_recognition as sr
-from langchain.callbacks import get_openai_callback
+
+# Import the logger from the main module
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 load_dotenv()
@@ -27,13 +33,14 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 
+prompt_file = open("system_instructions/language_expert.txt", "r").read()
+prompt_template = PromptTemplate(template=prompt_file)
+
 conversation = ConversationChain(
     llm=chat,
-    verbose=False,
+    verbose=False
+    # prompt=prompt_template
 )
-
-prompt_file = open("system_instructions/language_expert.txt", "r").read()
-
 def connect():
     global db, client
     """
@@ -50,6 +57,7 @@ def connect():
         print(e)
     db = client
     return db
+
 
 def addUser(entry:dict):
     db = connect().Main.users
@@ -130,12 +138,14 @@ def getChatIds():
 
 @app.route('/api/openChat', methods=['GET', 'POST'])
 def openChat():
+    print("Inside openachat")
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
     result = db.find({ "_id": obj })
     result = result[0]
+    print(f"result = {result}")
     assignmentid = result['assignment_id']
     userid = result['user_id']
 
@@ -234,15 +244,13 @@ def updateChat():
     result = result[0]
 
 
-"""
-Converts voice to text using speech_recognition module
-"""
-@app.route('/transcribe', methods=['POST'])
-def transcribe():
-    data = request.get_json()
-    filename = data.get('filename')
+def transcribe(filename):
+    """
+    Converts voice to text using speech_recognition module
+    """
+    # data = request.get_json()
+    # filename = data.get('filename')
 
-    print(f"data = {data}")
     if not filename:
         return jsonify({"error": "Filename not provided"}), 400
 
@@ -250,7 +258,7 @@ def transcribe():
     file_path = os.path.join('recordings', filename)
 
     try:
-        with sr.AudioFile(file_path) as source:
+        with sr.AudioFile(filename) as source:
             audio = recognizer.record(source)
             text = recognizer.recognize_whisper(audio) # You can try other recognizers as well, besides whisper
             return jsonify({"transcription": text})
@@ -262,20 +270,127 @@ def transcribe():
         return jsonify({"error": "File not found"}), 400
 
 
-"""
-Calls OpenAI LLM to Get Feedback. The system instructions for the LLM is provided in system_instructions directory.
-"""
-@app.route('/feedback', methods=['POST'])
+@app.route('/api/immediatefeedback', methods=['POST', 'GET'])
+def langchain_feedback():
+    """
+    This endpoint provides immediate feedback by calling a language model (LLM)
+    and saving the conversation history to a database.
+
+    Request JSON format:
+    {
+        "text": "Your input text here"
+    }
+
+    Returns:
+        Response: JSON response containing the AI feedback.
+
+    TODO:
+        1. Add system prompt for immediate feedbacks.
+        2. Provide a general or summarized version of feedback
+        3. Remove hardcoded studentId in `obj` variable
+    """
+    try:
+        data = request.get_json()
+        text = data.get('text')
+
+        print(f"text = {text}")
+
+        if not text:
+            return jsonify({"error": "Text or student ID not provided"}), 400
+
+        # Fetch feedback data from db
+        db = connect().Chat.feedback
+        obj = ObjectId("667bf7c96d8037b647330752")
+        feedback_data = db.find_one({ "_id": obj })
+        print(f"feedback_data = {feedback_data}")
+
+        # Initialize LangChain memory
+        memory = ConversationBufferMemory(
+            llm=chat,  # Initialize the LLM with the required parameters
+            max_token_limit=4096
+        )
+
+        # Check if message_history is empty
+        if not feedback_data.get("message_history"):
+            # Append user's data to db, get llm response, append ai's chat in db
+            message_history = f"Human: {text}\n"
+
+            ai_response = conversation.predict(input=text)
+            message_history += f"AI: {ai_response}\n"
+
+            # Save the updated message history to the database
+            if not feedback_data:
+                db.insert_one({"_id": obj, "student_id": "rfVmiajVyhRQu7F9apY0U2C30o22", "message_history": message_history})
+            else:
+                db.update_one(
+                    {"_id": obj},
+                    {"$set": {"student_id": "rfVmiajVyhRQu7F9apY0U2C30o22", "message_history": message_history}}
+                )
+        else:
+            # Get message history, add user's latest message, call llm, save llm's feedback in feedback chat in db
+            message_history = feedback_data["message_history"]
+            message_history += f"\nHuman: {text}\n"
+
+            print(f"message_history = {message_history}")
+
+            conversation.memory = memory
+            # Load existing conversation into memory
+            for line in message_history.split('\n'):
+                print(f"line = {line}")
+                if line.startswith("Human: "):
+                    user_input = line[len("Human: "):]
+                    conversation.memory.save_context({"input": user_input}, {"output": ""})
+                elif line.startswith("AI: "):
+                    ai_output = line[len("AI: "):]
+                    print(f"ai_output = {ai_output}")
+                    conversation.memory.save_context({"input": ""}, {"output": ai_output})
+
+            # Get AI's response for the latest user input
+            ai_response = conversation.predict(input=text)
+            message_history += f"AI: {ai_response}\n"
+
+            # Save the updated message history to the database
+            db.update_one(
+                {"_id": obj},
+                {"$set": {"message_history": message_history}}
+            )
+
+        return jsonify({"feedback": ai_response})
+    except Exception as e:
+        logger.error(f"Error in langchain_feedback: {str(e)}")
+        return jsonify({"error": "An error occurred"}), 500
+
+
+@app.route('/api/update_chat_history', methods=['POST'])
+def update_chat_history():
+    req = request.get_json()
+    text_human = req.get('text')
+    feedback_ai = req.get('feedback')
+
+    db = connect().Chat.session
+    chatid = req['chatid']
+    obj = ObjectId(chatid)
+    result = db.find({"_id": obj})
+
+    result = result[0]
+
+    message_history = result["chat"]
+    message_history += f"\nHuman: {text_human}\n"
+
+    message_history += f"AI: {feedback_ai}\n"
+    db.update_one(
+        {"_id": obj},
+        {"$set": {"message_history": message_history}}
+    )
+
+
+@app.route('/api/immediate_feedback', methods=['POST'])
 def feedback():
+    """
+    Calls OpenAI LLM to Get Feedback. The system instructions for the LLM is provided in system_instructions directory.
+    """
     data = request.get_json()
     text = data.get('text')
-
-    print(f"text = {text}")
-
-    if not text:
-        return jsonify({"error": "Text not provided"}), 400
-
-    # OpenAI API call for grammar and vocabulary feedback
 
     response: ChatCompletion = client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -291,6 +406,71 @@ def feedback():
     return jsonify({"feedback": feedback_text.content})
 
 
+@app.route('/api/record_voice', methods=['POST'])
+def record_voice():
+    """
+    Records audio from the microphone and saves it as a WAV file.
+
+    This endpoint accepts POST requests with JSON data containing the output
+    filename and the duration of the recording in seconds. It records audio
+    using the microphone, saves it to the specified file, and returns the
+    transcription of the audio.
+
+    Request JSON format:
+    {
+        "output_filename": "output.wav",
+        "record_seconds": 4
+    }
+
+    Returns:
+        Response: JSON response containing the transcription of the recorded audio.
+    """
+    data = request.get_json()
+    output_filename = data.get('output_filename', 'output.wav')
+    record_seconds = data.get('record_seconds', 4)
+
+    chunk = 1024  # Record in chunks of 1024 samples
+    sample_format = pyaudio.paInt16  # 16 bits per sample
+    channels = 1  # Mono
+    fs = 44100  # Record at 44100 samples per second
+
+    p = pyaudio.PyAudio()  # Create an interface to PortAudio
+
+    print('Recording...')
+
+    stream = p.open(format=sample_format,
+                    channels=channels,
+                    rate=fs,
+                    frames_per_buffer=chunk,
+                    input=True)
+
+    frames = []  # Initialize array to store frames
+
+    # Store data in chunks for the specified duration
+    for _ in range(0, int(fs / chunk * record_seconds)):
+        data = stream.read(chunk)
+        frames.append(data)
+
+    # Stop and close the stream
+    stream.stop_stream()
+    stream.close()
+    # Terminate the PortAudio interface
+    p.terminate()
+
+    print('Finished recording.')
+
+    # Save the recorded data as a WAV file
+    with wave.open(output_filename, 'wb') as wf:
+        wf.setnchannels(channels)
+        wf.setsampwidth(p.get_sample_size(sample_format))
+        wf.setframerate(fs)
+        wf.writeframes(b''.join(frames))
+
+    # Returns text form of the speech
+    transcription = transcribe(output_filename)
+    return transcription
+    # transcription = transcribe(output_filename)
+    # return jsonify({"transcription": transcription})
 """
 Saves the recorded audio from record_voice.py to api/recordings/ directory.
 TODO: Use this api to record voice, instead of record_voice.py

@@ -19,6 +19,7 @@ const Loginbox = () => {
       const currentUser = result.user;
       const role=fetchUserRole(currentUser);
       dispatch(addUser({ user: currentUser, role: role }));
+      console.log(role);
       if (role) {
         if (role === 'teacher') {
           router.push('/teacher/dashboard');
