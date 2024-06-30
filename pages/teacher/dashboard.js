@@ -19,7 +19,7 @@ import withRoleProtection from "../../hoc/authWrap.jsx";
         <HeaderStats />
         <div className="px-4 md:px-10 mx-auto w-full -m-24">
           <Dashboard />
-          <FooterAdmin />
+          {/* <FooterAdmin /> */}
         </div>
       </div>
     

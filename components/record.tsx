@@ -221,40 +221,45 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
           });
           const fetchedData = await response.json();
           console.log("fetched data",fetchedData)
+          console.log("transcription", fulltranscript)
           feedback.push({content:fetchedData.feedback})
           console.log(feedback)
+         // setTranscript([]);
+       
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } 
+      }
+      const updateDB = async () => {
+        try {
+          console.log("sending",fulltranscript[0])
+          const response = await fetch('/api/update_chat_history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify({"text":fulltranscript[0],
+              "chatid":chatid,
+              "feedback":feedback[0].content
+            }),
+          });
+          const fetchedData = await response.json();
+          console.log("fetched data",fetchedData)
+          // feedback.push({content:fetchedData.feedback})
+          // console.log(feedback)
           setTranscript([]);
-          //let feedback = fetchedData['response'];
-          
-         // console.log('message1:', message)
-        //  console.log('totalTranscript2:', totalTranscript)
-       //   console.log('botMessage:', botMessage)
-          // if (totalTranscript != "" && message != "") {
-          //   chatHistory.push({ role: "Human", content: totalTranscript });
-          //   chatHistory.push({ role: "AI", content: message });
-          // }
-        //  console.log('chatHistory:', chatHistory)
-          // setTranscript([]);
-          // setBotMessage("");
+       
         } catch (error) {
           console.error('Error fetching data:', error);
         } 
       }
          await fetchData();
-         await fetchFeedback();
+        await fetchFeedback();
+        //    updateDB();
+         //update_chat_history
 
-      /*
-      console.log('totalTranscript2:', totalTranscript)
-      console.log('botMessage:', botMessage)
-      if (totalTranscript != "" && botMessage != "") {
-        chatHistory.push({ role: "Human", content: totalTranscript });
-        chatHistory.push({ role: "AI", content: botMessage });
-      }
-      console.log('chatHistory:', chatHistory)
-      setTranscript([]);
-      setBotMessage("");
-      */
-   // }
+   
   };
 
   const handleToggleRecording = () => {
