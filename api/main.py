@@ -309,7 +309,34 @@ def record():
     file.save(os.path.join('recordings', file.filename))
     return jsonify({"message": "File saved successfully"}), 200
 
+@app.route('/api/getAssignmentFeedback', methods=['GET', 'POST'])
+def getAssignmentFeedback():
+    db = connect().Chat.session
+    req = request.get_json()
+    chatid = req['chatid']
+    obj = ObjectId(chatid)
+    find = db.find({ "_id": obj })
+    find = find[0]
+    chat = find["chat"]
+    prompt = """
+    You are a language expert. You will be given chat logs between a human and an AI chatbot, please provide direct feedback to the human consisting of grammatical feedback, vocabulary feedback and tone feedback. Focus only on correcting the human.
+    Provide your feedback of the human in a json format of {'grammatical': (grammatical feedback), 'vocabulary': (vocabulary feedback), 'tone': (tone feedback)} and separate each point for each feedback with a newline
+    """
+    response: ChatCompletion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": f"Chat Logs:\n{chat}"}
+        ],
+        max_tokens=1000
+    )
+
+    feedback = response.choices[0].message
+    feedback = eval(feedback)
+
+    return {'feedback': feedback}
+
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8888, host='0.0.0.0')
+    app.run(debug=True, port=5000, host='0.0.0.0')
 
