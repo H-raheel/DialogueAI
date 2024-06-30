@@ -4,18 +4,19 @@ import React from "react";
 
 import FooterAdmin from "../../components/Footers/FooterAdmin.js";
 import HeaderStats from "../../components/Headers/FeedbackHeaderStats.js";
-import Sidebar from "../../components/Sidebar/SidebarStudent.js";
+import Sidebar from "../../components/Sidebar/SidebarTeacher.js";
 import Dashboard from "../../components/feedbackDashboard.js";
-
+import withRoleProtection from "../../hoc/authWrap.jsx";
 
 const props={
+    student:"stdname",
   assignment:"Assignment 1",
   classsection:"2A",
-  submitdate:"12August"
+  submitted:"Yes"
   ,duedate:"12 August"
 
 }
- export default function feedbackDashboard() {
+function feedbackDashboard() {
   return (
     <>
    
@@ -33,5 +34,7 @@ const props={
     </>
   );
 }
+
+export default withRoleProtection(feedbackDashboard,['teacher'])
 
 

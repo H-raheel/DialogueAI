@@ -1,73 +1,81 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { UserAuth } from "../context/AuthContext";
 import type { ChatMessagesProps } from "../types/chat";
 
-
-export default function ChatMessages({ chatHistory,feedback }: ChatMessagesProps) {
+export default function ChatMessages({ chatHistory, feedback }: ChatMessagesProps) {
   const { user, googleSignIn, logOut } = UserAuth() || {};
-  const [loading, setLoading] = useState(false);
-  console.log(feedback)
-  console.log(chatHistory)
+  // const [chatLength, setChatLength] = useState(chatHistory.length);
+
+  // Refs for chat and feedback containers
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const feedbackContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Function to scroll chat container to bottom
+  const scrollChatToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Function to scroll feedback container to bottom
+  const scrollFeedbackToBottom = () => {
+    if (feedbackContainerRef.current) {
+      feedbackContainerRef.current.scrollTop = feedbackContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Effect to scroll to bottom when chat history changes
+  useEffect(() => {
+    scrollChatToBottom();
+  }, [chatHistory.length]); // Watch for changes in chat history length
+
+  // Effect to scroll to bottom when feedback changes
+  // useEffect(() => {
+  //   scrollFeedbackToBottom();
+  // }, [feedback.length]);
+
   return (
-    // <div className=" z-10 mt-10  lg:mt-20 pt-1 px-6  w-full h-96 overflow-y-auto lg:w-3/4 xl:w-2/4 border-0 lg:border-x-2 lg:border-white bg-white rounded-md">
-    <div className="grid grid-cols-8 mb-52  h-screen w-full" >
-    <div className="col-span-6 px-6 pr-2 pb-20 pl-10 overflow-y-auto bg-white ">
-      {(chatHistory && chatHistory.length === 0) || (!chatHistory) ? (
-        <div className="flex flex-col items-center justify-center h-screen w-full">
-          <h2 className=" text-xl text-center mt-12 animate-none lg:animate-bounce">
-            Start Recording!
-          </h2>
-        </div>
-      ) : (
-        chatHistory.map((message, index) => (
-          <div key={index} className="my-5 lg:my-10">
-            {message.role === "AI" ? (
-              <div className="flex mb-2 lg:mb-4">
-                <Image src="/bot.svg" alt="Robot Icon" width={20} height={20} priority />
-                <span className="ml-2 text-md lg:text-lg font-semibold text-blue-500">DialogueAI:</span>
-              </div>
-            ) : (
-              <div className="flex mb-2 lg:mb-4">
-                <Image src="/face.svg" alt="Face Icon" width={18} height={18} priority />
-                <span className="ml-2 text-md lg:text-lg font-semibold text-teal-500">You:</span>
-              </div>
-            )}
-            <span className="text-md lg:text-lg">{message.content}</span>
+    <div className="grid grid-cols-8 mb-52 h-screen w-full">
+      <div className="col-span-6 px-6 pr-2 pb-40 pl-10 overflow-y-auto bg-white" ref={chatContainerRef}>
+        {chatHistory.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-screen w-full">
+            <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">
+              Loading..
+            </h2>
           </div>
-        ))
-      )}
-      
-    </div>
-    <div className="col-span-2 px-6 pr-2  pb-20 pl-10 overflow-y-auto bg-slate-400">
-   
-      {(feedback && feedback.length === 0) || (!feedback) ? (
-        <div className="flex flex-col items-center justify-center h-screen w-screen">
-          <h2 className=" text-xl text-center mt-12 animate-none lg:animate-bounce">
-            Loading...
-          </h2>
-        </div>
-      ) : (
-        
-        feedback.map((message, index) => (
-          <div key={index} className="my-5 lg:my-10">
-            {/* {message.role === "AI" ? (
+        ) : (
+          chatHistory.map((message, index) => (
+            <div key={index} className="my-5 lg:my-10">
               <div className="flex mb-2 lg:mb-4">
-                <Image src="/bot.svg" alt="Robot Icon" width={20} height={20} priority />
-                <span className="ml-2 text-md lg:text-lg font-semibold text-blue-500">DialogueAI:</span>
+                <Image src={message.role === "AI" ? "/bot.svg" : "/face.svg"} alt="Icon" width={20} height={20} priority />
+                <span className="ml-2 text-md lg:text-lg font-semibold text-blue-500">
+                  {message.role === "AI" ? "DialogueAI:" : "You:"}
+                </span>
               </div>
-            ) : ( */}
+              <span className="text-md lg:text-lg">{message.content}</span>
+            </div>
+          ))
+        )}
+      </div>
+      <div className="col-span-2 px-6 pr-2 pb-28 pl-10 overflow-y-auto bg-slate-400" ref={feedbackContainerRef}>
+        {feedback.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-screen w-full">
+            <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">
+              Finding If there is any feedback...
+            </h2>
+          </div>
+        ) : (
+          feedback.map((message, index) => (
+            <div key={index} className="my-5 lg:my-10">
               <div className="flex mb-2 lg:mb-4">
-                {/* <Image src="/face.svg" alt="Face Icon" width={18} height={18} priority /> */}
                 <span className="ml-2 text-md lg:text-lg font-semibold text-red-700">Feedback:</span>
               </div>
-            {/* )} */}
-            <span className="text-md lg:text-lg">{message.content}</span>
-          </div>
-        ))
-      )}
-      
-    </div>
+              <span className="text-md lg:text-lg">{message.content}</span>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

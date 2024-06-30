@@ -15,9 +15,7 @@ export default function CardBarChart({role}) {
     "Grammer Mistakes": [50, 62, 70, 58, 65,50],
     "Vocabulary Mistakes": [30, 40, 35, 45, 50,50],
     "Tone Mistakes": [20, 25, 30, 35, 40,50],
-    // "Grammer Correct": [70, 80, 75, 85, 90,50],
-    // "Vocabulary Correct": [60, 70, 65, 75, 80,50],
-    // "Tone Correct": [50, 60, 55, 65, 70,50]
+  
   }
   React.useEffect(() => {
     let config = {

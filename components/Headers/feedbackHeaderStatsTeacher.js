@@ -6,7 +6,7 @@ import CardStats from "../Cards/CardStats.js";
 
 export default function HeaderStats({props}) {
 
-   const {assignment,classsection,submitted,duedate}=props;
+   const {assignment,classsection,submitted,duedate,name}=props;
 
    
   return (
@@ -16,8 +16,22 @@ export default function HeaderStats({props}) {
         <div className="px-4 md:px-10 mx-auto w-full">
           <div>
             {/* Card stats */}
-            <div className="flex flex-wrap">
+            <div className="flex">
+            <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
+            <CardStats
+                  statSubtitle="Student Name"
+                  statTitle={name}
+                  statArrow=""
+                  statPercent=""
+                 // statPercentColor="text-purple-500"
+                  statDescripiron=""
+                  statIconName="fas fa-person"
+                  statIconColor="bg-purple-500"
+                />
+                </div>
+
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
+
                 <CardStats
                   statSubtitle="Asssignment Name"
                   statTitle={assignment}
