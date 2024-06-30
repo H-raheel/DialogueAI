@@ -386,13 +386,13 @@ def update_chat_history():
     )
 
 
-@app.route('/api/immediate_feedback', methods=['GET'])
+@app.route('/api/immediate_feedback', methods=['POST'])
 def feedback():
     """
     Calls OpenAI LLM to Get Feedback. The system instructions for the LLM is provided in system_instructions directory.
     """
-    # data = request.get_json()
-    text = "The newspaper said their is going to be heavy rain tomorrow, so don't forget your umbrella"
+    req = request.get_json()
+    text = req.get('text')
 
     response_feedback: ChatCompletion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
