@@ -257,7 +257,7 @@ def transcribe(filename):
     file_path = os.path.join('recordings', filename)
 
     try:
-        with sr.AudioFile(file_path) as source:
+        with sr.AudioFile(filename) as source:
             audio = recognizer.record(source)
             text = recognizer.recognize_whisper(audio) # You can try other recognizers as well, besides whisper
             return jsonify({"transcription": text})
@@ -458,7 +458,10 @@ def record_voice():
 
     # Returns text form of the speech
     transcription = transcribe(output_filename)
-    return jsonify({"transcription": transcription})
+    
+    return transcription
+    # transcription = transcribe(output_filename)
+    # return jsonify({"transcription": transcription})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')

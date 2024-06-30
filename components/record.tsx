@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import ChatMessages from "./chatMessages";
 
 import { UserAuth } from "../context/AuthContext";
@@ -13,29 +13,64 @@ declare global {
 export default function MicrophoneComponent({ chatid }: ChatId) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
-  const [fulltranscript, setTranscript] = useState<any>([]);
+  const [fulltranscript, setTranscript] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("");
+  const [sentTranscription,setSentTranscription]=useState("")
   const [botMessage, setBotMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<any>([]);
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const recognitionRef = useRef<any>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch('/api/getLang', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         body: JSON.stringify({ chatid }),
+  //       });
+  //       const fetchedData = await response.json();
+  //       var lang = fetchedData['lang'];
+  //       setLanguage(lang);
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [chatid]);
+
+  const startRecording = async()  => {
+    setIsRecording(true);
+    const fetchData2 = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/getLang', {
+        const response = await fetch('/api/record_voice', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-          body: JSON.stringify({ chatid }),
+          body: JSON.stringify({ output_filename: "test.wav",
+        record_seconds:4 }),
         });
-        const fetchedData = await response.json();
-        var lang = fetchedData['lang'];
-        setLanguage(lang);
+        const transcription = await response.json();  
+        fulltranscript.push(transcription.transcription)
+        console.log(transcription)
+        setSentTranscription(transcription.transcript)// Assume response is in JSON format
+        console.log('Transcription over heree:', sentTranscription);
+      console.log(fulltranscript)
+      console.log("data is set noww")
+      await stopRecording()
+      //  setLanguage(lang);
+      //console.log(fetchedData)
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -43,28 +78,27 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
       }
     };
 
-    fetchData(); // Call fetchData when the component mounts
-  }, [chatid]);
+   await fetchData2(); 
 
-  const startRecording = () => {
-    setIsRecording(true);
-    recognitionRef.current = new window.webkitSpeechRecognition();
-    //recognitionRef.current.lang = 'zh-CN';
-    recognitionRef.current.lang = language;
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
+  // setTranscript((prevTranscripts: string[]) => [...prevTranscripts, sentTranscription]);
 
-    recognitionRef.current.onresult = (event: any) => {
-      const curtranscript = event.results[event.results.length - 1][0].transcript;
-      console.log(event.results[event.results.length - 1])
-      //console.log(event.results[event.results.length - 1][0].isFinal)
-      if (event.results[event.results.length - 1].isFinal && curtranscript != "") {
-        //console.log(event.results);
-        fulltranscript.push(curtranscript);
-      }
-    };
+    // recognitionRef.current = new window.webkitSpeechRecognition();
+    // //recognitionRef.current.lang = 'zh-CN';
+    // recognitionRef.current.lang = language;
+    // recognitionRef.current.continuous = true;
+    // recognitionRef.current.interimResults = true;
 
-    recognitionRef.current.start();
+    // // recognitionRef.current.onresult = (event: any) => {
+    // //   const curtranscript = event.results[event.results.length - 1][0].transcript;
+    // //   console.log(event.results[event.results.length - 1])
+    // //   //console.log(event.results[event.results.length - 1][0].isFinal)
+    // //   if (event.results[event.results.length - 1].isFinal && curtranscript != "") {
+    // //     //console.log(event.results);
+    // //     fulltranscript.push(curtranscript);
+    // //   }
+    // // };
+
+    // recognitionRef.current.start();
   };
 
   function joinStringsLowercase(arr:any) {
@@ -77,17 +111,20 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
     }
   }  
 
-  useEffect(() => {
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     if (recognitionRef.current) {
+  //       recognitionRef.current.stop();
+  //     }
+  //   };
+  // }, []);
 
-  const stopRecording = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+  const stopRecording = async () => {
+    setIsRecording(false)
+    console.log("recstopped")
+    console.log(fulltranscript)
+   // if (recognitionRef.current) {
+      // recognitionRef.current.stop();
       setRecordingComplete(true);
       let totalTranscript = joinStringsLowercase(fulltranscript);
       console.log('total transcript:', totalTranscript);
@@ -103,9 +140,10 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
           });
           const fetchedData = await response.json();
           let message = fetchedData['response'];
+          
           console.log('message1:', message)
           console.log('totalTranscript2:', totalTranscript)
-          console.log('botMessage:', botMessage)
+       //   console.log('botMessage:', botMessage)
           if (totalTranscript != "" && message != "") {
             chatHistory.push({ role: "Human", content: totalTranscript });
             chatHistory.push({ role: "AI", content: message });
@@ -117,7 +155,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
           console.error('Error fetching data:', error);
         } 
       }
-      fetchData();
+  await   fetchData();
       /*
       console.log('totalTranscript2:', totalTranscript)
       console.log('botMessage:', botMessage)
@@ -129,7 +167,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
       setTranscript([]);
       setBotMessage("");
       */
-    }
+   // }
   };
 
   const handleToggleRecording = () => {
@@ -141,35 +179,35 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('/api/openChat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ "chatid": chatid }),
-        });
-        const fetchedData = await response.json();
-        var messages = fetchedData['chatHistory'];
-        setChatHistory(messages);
-        console.log('chatHistory1:', messages)
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch('/api/openChat', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         body: JSON.stringify({ "chatid": chatid }),
+  //       });
+  //       const fetchedData = await response.json();
+  //       var messages = fetchedData['chatHistory'];
+  //       setChatHistory(messages);
+  //       console.log('chatHistory1:', messages)
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData(); // Call fetchData when the component mounts
-  }, [chatid]);
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [chatid]);
 
   return (
-    <main className="grid grid-cols-8 w-full mb h-screen">
-      <div className="col-span-6 bg-white " >
+    <main className="  mb-7 h-screen w-screen bg-">
+      <div className=" bg-white " >
      
         <ChatMessages chatHistory={chatHistory} />
         <div className="flex flex-col items-center w-full fixed bottom-0 pb-3">
@@ -203,9 +241,10 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
         </div>
        
       </div>
-      <div className=" bg-gray-300 col-span-2">
+      {/* <div className=" bg-gray-300 col-span-2">
       <ChatMessages chatHistory={chatHistory} />
-      </div>
+      
+      </div> */}
       
     </main>
   );
