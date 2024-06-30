@@ -1,3 +1,5 @@
+import re
+
 from flask import Flask, request, flash, jsonify
 from langchain_core.prompts import PromptTemplate
 
@@ -33,8 +35,8 @@ openai_client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 
-prompt_file = open("system_instructions/language_expert.txt", "r").read()
-prompt_template = PromptTemplate(template=prompt_file)
+prompt_file_provide_feedback = open("system_instructions/language_expert.txt", "r").read()
+prompt_file_provide_number_of_errors = open("system_instructions/num_errors.txt", "r").read()
 
 conversation = ConversationChain(
     llm=chat,
@@ -384,26 +386,52 @@ def update_chat_history():
     )
 
 
-@app.route('/api/immediate_feedback', methods=['POST'])
+@app.route('/api/immediate_feedback', methods=['GET'])
 def feedback():
     """
     Calls OpenAI LLM to Get Feedback. The system instructions for the LLM is provided in system_instructions directory.
     """
-    data = request.get_json()
-    text = data.get('text')
+    # data = request.get_json()
+    text = "The newspaper said their is going to be heavy rain tomorrow, so don't forget your umbrella"
 
-    response: ChatCompletion = openai_client.chat.completions.create(
+    response_feedback: ChatCompletion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": f"{prompt_file}"},
+            {"role": "system", "content": f"{prompt_file_provide_feedback}"},
             {"role": "user", "content": f"{text}"}
         ],
-        max_tokens=150
+        max_tokens=150,
+        temperature=0.1,
+    )
+    feedback_text = response_feedback.choices[0].message
+    feedback_text_final = f"ORIGINAL PHRASE: {text}\n" + f"{feedback_text.content}"
+
+    response_quantify_mistakes: ChatCompletion = openai_client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": f"{prompt_file_provide_number_of_errors}"},
+            {"role": "user", "content": f"{feedback_text_final}"}
+        ],
+        max_tokens=150,
+        temperature=0.1,
     )
 
-    feedback_text = response.choices[0].message
-    print(f"feedback_text = {feedback_text}")
-    return jsonify({"feedback": feedback_text.content})
+    num_errors_text = response_quantify_mistakes.choices[0].message
+
+    # Regular expression to extract values
+    grammar_errors = re.search(r'number_of_grammar_errors: (\d+)', num_errors_text.content).group(1)
+    tone_errors = re.search(r'number_of_tone_errors: (\d+)', num_errors_text.content).group(1)
+    vocabulary_errors = re.search(r'number_of_vocabulary_errors: (\d+)', num_errors_text.content).group(1)
+
+    # Convert extracted values to integers
+    number_of_grammar_errors = int(grammar_errors)
+    number_of_tone_errors = int(tone_errors)
+    number_of_vocabulary_errors = int(vocabulary_errors)
+
+    return jsonify({"feedback": feedback_text_final,
+                    "number_of_grammar_errors": number_of_grammar_errors,
+                    "number_of_tone_errors": number_of_tone_errors,
+                    "number_of_vocabulary_errors": number_of_vocabulary_errors})
 
 
 @app.route('/api/record_voice', methods=['POST'])
@@ -488,6 +516,7 @@ def record():
 
     file.save(os.path.join('recordings', file.filename))
     return jsonify({"message": "File saved successfully"}), 200
+
 
 @app.route('/api/getAssignmentFeedback', methods=['GET', 'POST'])
 def getAssignmentFeedback():
