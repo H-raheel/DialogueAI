@@ -58,6 +58,7 @@ def connect():
     db = client
     return db
 
+
 def addUser(entry:dict):
     db = connect().Main.users
     userid = entry['user_id']
@@ -360,27 +361,36 @@ def langchain_feedback():
         return jsonify({"error": "An error occurred"}), 500
 
 
-@app.route('/api/generalfeedback', methods=['POST'])
+@app.route('/api/update_chat_history', methods=['POST'])
+def update_chat_history():
+    req = request.get_json()
+    text_human = req.get('text')
+    feedback_ai = req.get('feedback')
+
+    db = connect().Chat.session
+    chatid = req['chatid']
+    obj = ObjectId(chatid)
+    result = db.find({"_id": obj})
+
+    result = result[0]
+
+    message_history = result["chat"]
+    message_history += f"\nHuman: {text_human}\n"
+
+    message_history += f"AI: {feedback_ai}\n"
+    db.update_one(
+        {"_id": obj},
+        {"$set": {"message_history": message_history}}
+    )
+
+
+@app.route('/api/immediate_feedback', methods=['POST'])
 def feedback():
     """
-    TODO: This is yet to be implemented
     Calls OpenAI LLM to Get Feedback. The system instructions for the LLM is provided in system_instructions directory.
     """
     data = request.get_json()
     text = data.get('text')
-
-    print(f"text = {text}")
-
-    if not text:
-        return jsonify({"error": "Text not provided"}), 400
-
-    # OpenAI API call for grammar and vocabulary feedback
-
-    # Fetch feedback data from db
-    # Check if chat is empty
-    #   If chat is empty, append user's data to db, get llm response, append ai's chat in db
-    #   If chat is not empty, get message history, add user's latest message -
-    #                           call llm - save llm's feedback in feedback chat in db
 
     response: ChatCompletion = client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -458,11 +468,10 @@ def record_voice():
 
     # Returns text form of the speech
     transcription = transcribe(output_filename)
-    
     return transcription
     # transcription = transcribe(output_filename)
     # return jsonify({"transcription": transcription})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=8888, host='0.0.0.0')
 
