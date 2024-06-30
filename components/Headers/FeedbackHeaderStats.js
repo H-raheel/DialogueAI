@@ -4,7 +4,11 @@ import React from "react";
 
 import CardStats from "../Cards/CardStats.js";
 
-export default function HeaderStats(role) {
+export default function HeaderStats({props}) {
+
+   const {assignment,classsection,submitdate,duedate}=props;
+
+   
   return (
     <>
       {/* Header */}
@@ -15,8 +19,8 @@ export default function HeaderStats(role) {
             <div className="flex flex-wrap">
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle={role=="teacher"?"Total Classes":"Language"}
-                  statTitle={role=="teacher"?"120":"5"}
+                  statSubtitle="Asssignment Name"
+                  statTitle={assignment}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -27,8 +31,8 @@ export default function HeaderStats(role) {
               </div>
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle={role=="teacher"?"Total Due Assignments":"Assignments Given"}
-                  statTitle="12"
+                  statSubtitle="Class"
+                  statTitle={classsection}
                   statArrow=""
                   statPercent=""
                   statPercentColor=""
@@ -38,37 +42,28 @@ export default function HeaderStats(role) {
                 />
               </div>
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
-                {/* <CardStats
-                  statSubtitle="SALES"
-                  statTitle="924"
-                  statArrow="down"
-                  statPercent="1.10"
-                  statPercentColor="text-orange-500"
-                  statDescripiron="Since yesterday"
-                  statIconName="fas fa-users"
-                  statIconColor="bg-pink-500"
-                /> */}
+               
                 <CardStats
-                  statSubtitle="Best Performing Class"
-                  statTitle="2A"
-                  statArrow=""
-                  statPercent=""
-                  statPercentColor="text-emerald-500"
-                  statDescripiron=""
-                  statIconName="fas fa-smile-beam"
-                  statIconColor="bg-green-500"
-                />
-              </div>
-              <div className="font-light w-full lg:w-6/12 xl:w-3/12 px-4">
-                <CardStats
-                  statSubtitle="Worst Performing Class"
-                  statTitle="2C"
+                  statSubtitle="Submit Date"
+                  statTitle={submitdate}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
                   statDescripiron=""
                   statIconName="fas fa-frown"
                   statIconColor="bg-red-500"
+                />
+              </div>
+              <div className="font-light w-full lg:w-6/12 xl:w-3/12 px-4">
+                <CardStats
+                  statSubtitle="Due Date"
+                  statTitle={duedate}
+                  statArrow=""
+                  statPercent=""
+                  statPercentColor="text-emerald-500"
+                  statDescripiron=""
+                  statIconName="fas fa-smile-beam"
+                  statIconColor="bg-green-500"
                 />
               </div>
             </div>

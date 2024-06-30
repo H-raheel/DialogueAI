@@ -84,6 +84,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
       setLoading(true);
       try {
         const response = await fetch('/api/record_voice', {
+        const response = await fetch('/api/record_voice', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -168,6 +169,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
           });
           const fetchedData = await response.json();
           let message = fetchedData['response'];
+          
           
           console.log('message1:', message)
           console.log('totalTranscript2:', totalTranscript)
@@ -263,11 +265,37 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   //       setLoading(false);
   //     }
   //   };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch('/api/openChat', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         body: JSON.stringify({ "chatid": chatid }),
+  //       });
+  //       const fetchedData = await response.json();
+  //       var messages = fetchedData['chatHistory'];
+  //       setChatHistory(messages);
+  //       console.log('chatHistory1:', messages)
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [chatid]);
   //   fetchData(); // Call fetchData when the component mounts
   // }, [chatid]);
 
   return (
+    <main className="  mb-7 h-screen w-screen bg-">
+      <div className=" bg-white " >
     <main className="  mb-7 h-screen w-screen bg-">
       <div className=" bg-white " >
      
@@ -322,7 +350,10 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
        
       </div>
       {/* <div className=" bg-gray-300 col-span-2">
+      {/* <div className=" bg-gray-300 col-span-2">
       <ChatMessages chatHistory={chatHistory} />
+      
+      </div> */}
       
       </div> */}
       

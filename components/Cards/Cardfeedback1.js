@@ -2,25 +2,18 @@ import React from "react";
 
 // Dummy data for API
 const dummyData = {
-  highAchievers: [
-    "Student 1",
-    "Student 2",
-    "Student 3",
-    "Student 4",
-    "Student 5",
-  ],
-  needsImprovement: [
-    "Student 6",
-    "Student 7",
-    "Student 8",
-    "Student 9",
-    "Student 10",
+  donewell: [
+   "Things done well",
+   "nice vocab",
+   "good listening",
+   "comprehension skills"
+
   ],
 };
 
 // components
 
-export default function CardStudentsPerformance() {
+export default function CardGreatWork() {
   return (
     <>
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
@@ -28,7 +21,7 @@ export default function CardStudentsPerformance() {
           <div className="flex flex-wrap items-center">
             <div className="relative w-full px-4 max-w-full flex-grow flex-1">
               <h3 className="font-semibold text-base text-blueGray-700">
-                Students Performance
+               Great Job
               </h3>
             </div>
             {/* <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
@@ -45,7 +38,7 @@ export default function CardStudentsPerformance() {
         <div className="block w-full overflow-x-auto">
        
           <table className="items-center w-full bg-transparent border-collapse">
-            <thead className="thead-light">
+            {/* <thead className="thead-light">
               <tr>
                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                   High Achievers
@@ -54,16 +47,16 @@ export default function CardStudentsPerformance() {
                   Needs Improvement
                 </th>
               </tr>
-            </thead>
+            </thead> */}
             <tbody className="text-black">
-              {dummyData.highAchievers.map((student, index) => (
+              {dummyData.donewell.map((data, index) => (
                 <tr key={index}>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {student}
+                    {data}
                   </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                  {/* <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                     {dummyData.needsImprovement[index] || "N/A"}
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

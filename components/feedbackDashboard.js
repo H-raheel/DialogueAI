@@ -1,66 +1,67 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 // components
 
-import CardLineChart from "../components/Cards/CardLineChart.js";
-import CardBarChart from "../components/Cards/CardBarChart.js";
-import CardPageVisits from "../components/Cards/CardPageVisits.js";
-import CardSocialTraffic from "../components/Cards/CardSocialTraffic.js";
-import ChatMessages from "./chatMessages.js";
-import { UserAuth } from "../context/AuthContext.js";
-import { useState, Fragment, useEffect } from "react";
-
+import { useSelector } from "react-redux";
+import CardBarChart from "./Cards/CardBarChart.js";
+import CardMistakes from "./Cards/CardFeedback2.js";
+import CardGreatWork from "./Cards/Cardfeedback1.js";
+import ChatMessages from "./chatMessages";
 export default function Dashboard() {
-    const [loading, setLoading] = useState(true);
-    const { user } = UserAuth();
-    const [chat, setChat] = useState([]);
+ 
+  const role=useSelector((state) => state.role);
+  const [chatHistory,setChatHistory]=useState([])
+  const [loading,setLoading]=useState(false);
+  const chatid='6625d19e23b55556764d3198'
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/openChat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ "chatid": chatid }),
+        });
+        const fetchedData = await response.json();
+        var messages = fetchedData['chatHistory'];
+        setChatHistory(messages);
+        console.log('chatHistory1:', messages)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    useEffect(() => {
-        const checkAuthentication = async () => {
-            await new Promise((resolve) => setTimeout(resolve, 50));
-            setLoading(false);
-        };
-        const fetchData = async () => {
-            if (!user) {
-                return;
-            }
-            const uid = user.uid;
-            try {
-                const response = await fetch("/api/getChat", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify({ "uid": uid }),
-                });
-                const fetchedData = await response.json();
-                setChat(fetchedData["chat"]);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-        checkAuthentication();
-        fetchData();
-    }, [user]);
+    fetchData(); // Call fetchData when the component mounts
+  }, [chatid]);
     return (
       <>
-        <div className="flex flex-wrap">
-          <div className="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
-            <CardLineChart />
+   <div className="flex flex-row">
+  <div className="xl:w-8/12 mx-28 mb-12">
+    <CardBarChart role />
+  </div>
+  <div className="xl:w-4/12 px-4 flex flex-col">
+    <div className="flex-grow">
+      <CardGreatWork />
+    </div>
+  </div>
+</div>
+
+      <div className="flex mt-4 ">
+       
+        
+       
+        <div className=" xl:w-4/12" >
+          <ChatMessages chatHistory={chatHistory}/>
           </div>
-          <div className="w-full xl:w-4/12 px-4">
-            <CardBarChart />
-          </div>
+        <div className=" px-4 xl:w-8/12 flex-grow">
+          <CardMistakes />
         </div>
-        <div className="flex flex-wrap mt-4">
-          <div className="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
-            <CardPageVisits />
-          </div>
-          <div className="w-full xl:w-4/12 px-4">
-            <CardSocialTraffic />
-          </div>
-        </div>
-      </>
+      </div>
+    </>
     );
   }

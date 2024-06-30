@@ -30,7 +30,7 @@ export default function FooterAdmin() {
                 </li>
                 <li>
                   <a
-                    href="https://www.creative-tim.com/presentation?ref=nnjs-footer-admin"
+                    href="/"
                     className="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
                   >
                     About Us
@@ -45,12 +45,12 @@ export default function FooterAdmin() {
                   </a>
                 </li>
                 <li>
-                  <a
+                  {/* <a
                     href="https://github.com/creativetimofficial/notus-nextjs/blob/main/LICENSE.md?ref=nnjs-footer-admin"
                     className="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
                   >
                     MIT License
-                  </a>
+                  </a> */}
                 </li>
               </ul>
             </div>

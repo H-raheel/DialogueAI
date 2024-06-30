@@ -4,23 +4,27 @@ import React from "react";
 const dummyData = {
   mistakes: [
     {
-      class: "2A",
-      assignment: "Assignment 1",
-      avgVocabularyMistakes: 1480,
-      avgGrammarMistakes: 14,
+     mistake:"mistake 1",
+     correction:"correction 1"
     },
     {
-      class: "2B",
-      assignment: "Assignment 2",
-      avgVocabularyMistakes: 5480,
-      avgGrammarMistakes: 14,
-    },
+        mistake:"mistake 1",
+        correction:"correction 1"
+       },
+       {
+        mistake:"mistake 1",
+        correction:"correction 1"
+       },
+       {
+        mistake:"mistake 1",
+        correction:"correction 1"
+       },
   ],
 };
 
 // components
 
-export default function CardSocialTraffic() {
+export default function CardMistakes() {
   return (
     <>
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded pb-2">
@@ -46,17 +50,12 @@ export default function CardSocialTraffic() {
             <thead className="thead-light">
               <tr>
                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                  Class
+                  Mistake
                 </th>
                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                  Assignment
+                 Correction
                 </th>
-                <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                  Average Vocabulary Mistakes
-                </th>
-                <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                  Average Grammar Mistakes
-                </th>
+               
                 {/* <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left min-w-140-px">
                   Accuracy
                 </th> */}
@@ -66,17 +65,12 @@ export default function CardSocialTraffic() {
               {dummyData.mistakes.map((mistake, index) => (
                 <tr key={index}>
                   <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
-                    {mistake.class}
+                    {mistake.mistake}
                   </th>
                   <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
-                    {mistake.assignment}
+                    {mistake.correction}
                   </th>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {mistake.avgVocabularyMistakes}
-                  </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {mistake.avgGrammarMistakes}
-                  </td>
+                 
                 </tr>
               ))}
             </tbody>
