@@ -363,6 +363,118 @@ def langchain_feedback():
         return jsonify({"error": "An error occurred"}), 500
 
 
+@app.route('api/get_last_six_error_summation_for_student', methods=['GET'])
+def get_error_summation_student():
+    """
+    Retrieve the last 6 assignments for a given user_id and return their names and error counts.
+
+    Query Parameters:
+    - user_id (str): The ID of the _student_ whose assignments are to be retrieved.
+
+    Returns:
+    - JSON response containing:
+        - labels (list of str): Names of the last 6 assignments.
+        - number_of_grammar_errors (list of int): Number of grammar errors in each assignment.
+        - number_of_tone_errors (list of int): Number of tone errors in each assignment.
+        - number_of_vocabulary_errors (list of int): Number of vocabulary errors in each assignment.
+    - HTTP Status 200 if the operation is successful.
+    - HTTP Status 400 if the user_id is not provided.
+    - HTTP Status 404 if no assignments are found for the given user_id.
+    - HTTP Status 500 for any other errors.
+
+    Example Request:
+    GET /get_last_6_assignments?user_id=rfVmiajVyhRQu7F9apY0U2C30o22
+    """
+    data = request.json
+
+    if not data or not 'user_id' in data:
+        return jsonify({'error': 'Invalid input'}), 400
+
+    user_id = data['user_id']
+
+    assignment_db = connect().Main.assignments
+
+    try:
+        assignments = list(assignment_db.find({'user_id': user_id}).sort('created', -1).limit(6))
+
+        if not assignments:
+            return jsonify({'error': 'No assignments found for the given user_id'}), 404
+
+        labels = [assignment['name'] for assignment in assignments]
+        number_of_grammar_errors = [assignment.get('number_of_grammar_errors', 0) for assignment in assignments]
+        number_of_tone_errors = [assignment.get('number_of_tone_errors', 0) for assignment in assignments]
+        number_of_vocabulary_errors = [assignment.get('number_of_vocabulary_errors', 0) for assignment in assignments]
+
+        response = {
+            'labels': labels,
+            'number_of_grammar_errors': number_of_grammar_errors,
+            'number_of_tone_errors': number_of_tone_errors,
+            'number_of_vocabulary_errors': number_of_vocabulary_errors
+        }
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('api/get_last_six_error_summation_for_teacher', methods=['GET'])
+def get_error_summation_teacher():
+    """
+    Retrieve the last 6 assignments for a given user_id and return their names and error counts.
+
+    Query Parameters:
+    - user_id (str): The ID of the _teacher_ for whose students assignments are to be retrieved.
+
+    Returns:
+    - JSON response containing:
+        - labels (list of str): Names of the last 6 assignments.
+        - number_of_grammar_errors (list of int): Number of grammar errors in each assignment.
+        - number_of_tone_errors (list of int): Number of tone errors in each assignment.
+        - number_of_vocabulary_errors (list of int): Number of vocabulary errors in each assignment.
+    - HTTP Status 200 if the operation is successful.
+    - HTTP Status 400 if the user_id is not provided.
+    - HTTP Status 404 if no assignments are found for the given user_id.
+    - HTTP Status 500 for any other errors.
+
+    Example Request:
+    GET /get_last_6_assignments?user_id=uB5QM291PoXZnShJDj6VCdKGS4R2
+
+    Note: Although the request takes user_id, it is mapped to the _assigner_ which is the teacher of the assignments.
+    """
+
+    data = request.json
+
+    if not data or not 'user_id' in data:
+        return jsonify({'error': 'Invalid input'}), 400
+
+    assigner = data['user_id']
+
+    assignment_db = connect().Main.assignments
+
+    try:
+        assignments = list(assignment_db.find({'assigner': assigner}).sort('created', -1).limit(6))
+
+        if not assignments:
+            return jsonify({'error': 'No assignments found for the given user_id'}), 404
+
+        labels = [assignment['name'] for assignment in assignments]
+        number_of_grammar_errors = [assignment.get('number_of_grammar_errors', 0) for assignment in assignments]
+        number_of_tone_errors = [assignment.get('number_of_tone_errors', 0) for assignment in assignments]
+        number_of_vocabulary_errors = [assignment.get('number_of_vocabulary_errors', 0) for assignment in assignments]
+
+        response = {
+            'labels': labels,
+            'number_of_grammar_errors': number_of_grammar_errors,
+            'number_of_tone_errors': number_of_tone_errors,
+            'number_of_vocabulary_errors': number_of_vocabulary_errors
+        }
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/assignment_submitted', methods=['POST'])
 def update_assignment_is_submitted():
     req = request.get_json()
