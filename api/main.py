@@ -501,6 +501,7 @@ def update_chat_history_mistakes_for_immediate_feedback():
     req = request.get_json()
     text_human = req.get('text')
     feedback_ai = req.get('feedback')
+    roleplay_ai = req.get('roleplay_ai')
 
     db = connect().Chat.session
     db2 = connect().Main.assignments
@@ -508,18 +509,24 @@ def update_chat_history_mistakes_for_immediate_feedback():
     chat_id = req['chatid']
     obj = ObjectId(chat_id)
 
-    # Updating chat_history
+
     result = db.find({"_id": obj})
     result = result[0]
-    message_history = result["chat"]
-    message_history += f"\nHuman: {text_human}\n"
 
+    # Updating message_history of feedbacks
+    message_history = result["message_history"]
+    message_history += f"\nHuman: {text_human}\n"
     message_history += f"AI: {feedback_ai}\n"
 
-    print(f"message_history = {message_history}")
+    # Updating chat_history of roleplay
+    chat_history = result["chat"]
+    chat_history += f"\nHuman: {text_human}\n"
+    chat_history += f"AI: {roleplay_ai}"
+
 
     db.update_one(
         {"_id": obj},
+        {"$set": {"chat": chat_history}},
         {"$set": {"message_history": message_history}}
     )
 
@@ -546,6 +553,71 @@ def update_chat_history_mistakes_for_immediate_feedback():
     )
 
     return "success"
+
+
+@app.route('/api/get_header_statistics_for_teacher', methods=['GET'])
+def get_header_statistics_for_teacher():
+    """
+    GET endpoint to fetch statistics for a teacher based on assignments.
+
+    Parameters:
+    - teacher_id (str): The ID of the teacher whose statistics are to be retrieved.
+
+    Returns:
+    - JSON response containing:
+      - "best_performing_student": Name of the student with the lowest total errors.
+      - "worst_performing_student": Name of the student with the highest total errors.
+      - "number_of_assignments": Total number of assignments given by the teacher.
+      - "language": languages for which the teacher is in-charge.
+
+    Errors:
+    - 400 if 'teacher_id' parameter is missing.
+    - 404 if no assignments are found for the given teacher_id.
+    """
+    req = request.get_json()
+    teacher_id = req.get('user_id')
+
+    if not teacher_id:
+        return jsonify({"error": "teacher_id parameter is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    db_users = connect().Main.users
+
+    # Filter assignments by teacher_id (assigner)
+    assignments = db_assignments.find({"assigner": teacher_id})
+    users = db_users.find()
+
+    user_stats = {}
+
+    for assignment in assignments:
+        user_id = assignment['user_id']
+        errors_sum = assignment['grammar_errors'] + assignment['tone_errors'] + assignment['vocabulary_errors']
+
+        if user_id in user_stats:
+            user_stats[user_id] += errors_sum
+        else:
+            user_stats[user_id] = errors_sum
+
+    if not user_stats:
+        return jsonify({"error": "No assignments found for the given teacher_id"}), 404
+
+    best_performing_student = min(user_stats, key=user_stats.get)
+    worst_performing_student = max(user_stats, key=user_stats.get)
+
+    # Get the names of the best and worst performing students
+    users = list(users)  # Convert cursor to list for reuse
+    best_student_name = next(user['name'] for user in users if user['user_id'] == best_performing_student)
+    worst_student_name = next(user['name'] for user in users if user['user_id'] == worst_performing_student)
+
+    number_of_assignments = db.assignments.count_documents({"assigner": teacher_id})
+
+    return jsonify({
+        "language": assignments[0]['language'],
+        "best_performing_student": best_student_name,
+        "worst_performing_student": worst_student_name,
+        "number_of_assignments": number_of_assignments
+    })
+
 
 @app.route('/api/immediate_feedback', methods=['POST'])
 def feedback():
