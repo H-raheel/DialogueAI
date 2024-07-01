@@ -363,7 +363,7 @@ def langchain_feedback():
         return jsonify({"error": "An error occurred"}), 500
 
 
-@app.route('/api/get_last_six_error_summation_for_student', methods=['GET'])
+@app.route('/api/get_last_six_error_summation_for_student', methods=['POST'])
 def get_error_summation_student():
     """
     Retrieve the last 6 assignments for a given user_id and return their names and error counts.

@@ -13,7 +13,7 @@ export default function StudentDashboard() {
             <CardLineChart />
           </div> */}
           <div className="z-40  w-full xl:w-12/12 px-4">
-            <CardBarChart role="Student" />
+            <CardBarChart  />
           </div>
         </div>
         {/* <div className="flex flex-wrap mt-4">

@@ -17,7 +17,7 @@ export default function Dashboard() {
             <CardLineChart />
           </div> */}
           <div className="  items-center xl:w-10/12 mx-28 mb-12 ">
-            <CardBarChart  role/>
+            <CardBarChart />
           </div>
         </div>
         <div className="flex mt-4 ">
