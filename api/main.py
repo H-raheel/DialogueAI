@@ -525,20 +525,22 @@ def update_chat_history_mistakes_for_immediate_feedback():
 
     # Updating assignments collection with the mistakes
     result2 = db2.find({"chat_id": chat_id})
+
     result2 = result2[0]
+    print(result2)
     update_fields = {}
 
-    if 'number_of_grammar_errors' in req:
+    if 'grammar_errors' in req:
         update_fields['grammar_errors'] = result2.get('grammar_errors') + req['grammar_errors']
-    if 'number_of_tone_errors' in req:
+    if 'tone_errors' in req:
         update_fields['tone_errors'] = result2.get('tone_errors') + req['tone_errors']
-    if 'number_of_vocabulary_errors' in req:
+    if 'vocabulary_errors' in req:
         update_fields['vocabulary_errors'] = result2.get('vocabulary_errors') + req['vocabulary_errors']
 
     if not update_fields:
         return jsonify({'error': 'No valid fields to update'}), 400
-
-    result2.update_one(
+    
+    db2.update_one(
         {'chat_id': chat_id},
         {'$set': update_fields}
     )

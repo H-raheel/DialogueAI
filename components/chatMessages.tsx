@@ -62,7 +62,7 @@ export default function ChatMessages({ chatHistory, feedback }: ChatMessagesProp
         {feedback.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-screen w-full">
             <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">
-              Finding If there is any feedback...
+              Getting Feedback...
             </h2>
           </div>
         ) : (

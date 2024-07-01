@@ -18,7 +18,7 @@ import withRoleProtection from '../../../hoc/authWrap.jsx';
     <div className="grid grid-rows-8 h-screen overflow-hidden">
     
       {/* <Sidebar /> */}
-      <div className="bg-black-100 " > <SpeechNavbar /></div>
+      <div className="bg-black-100 " > <SpeechNavbar chatid={chatid} /></div>
        
         <div className="bg-yellow-400 row-span-7 flex flex-col items-start justify-start" >
           <MicrophoneComponent chatid={chatid} />

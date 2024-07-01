@@ -9,7 +9,6 @@ const dummyData = {
         class: "3A",
         assignmentNumber: "Assignment 1",
         dueDate: "10 August",
-       
         submitted: "Yes"
     },
     {

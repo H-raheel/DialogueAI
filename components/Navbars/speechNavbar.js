@@ -1,44 +1,72 @@
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { UserAuth } from "../../context/AuthContext.js";
-export default function SpeechNavbar() {
+export default function SpeechNavbar({chatid}) {
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const [loading, setLoading] = useState(true);
   const [assignments, setAssignments] = useState([]);
   var data;
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(true);
-        return;
-      }
-      setLoading(true);
-      const uid = user.uid;
-      console.log('running')
-      try {
-        const response = await fetch('/api/getAssignments', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ uid }),
-        });
-        const fetchedData = await response.json();
-        data = fetchedData['result'];
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!user) {
+  //       setLoading(true);
+  //       return;
+  //     }
+  //     setLoading(true);
+  //     const uid = user.uid;
+  //     console.log('running')
+  //     try {
+  //       const response = await fetch('/api/getAssignments', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         body: JSON.stringify({ uid }),
+  //       });
+  //       const fetchedData = await response.json();
+  //       data = fetchedData['result'];
 
-        setAssignments(data);
-        console.log('data:', data)
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setAssignments(data);
+  //       console.log('data:', data)
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData(); // Call fetchData when the component mounts
-  }, [user]);
-  console.log('data:', data);
+  //   fetchData(); // Call fetchData when the component mounts
+  // }, [user]);
+
+  const submitAssignment = async () => {
+    // if (!user) {
+    //   setLoading(true);
+    //   return;
+    // }
+    // setLoading(true);
+
+    console.log('running')
+    try {
+      const response = await fetch('/api/assignment_submitted', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({"chat_id":chatid}),
+      });
+      const fetchedData = await response.json();
+     
+
+    console.log(fetchedData)
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Navbar */}
@@ -54,12 +82,21 @@ export default function SpeechNavbar() {
             <div className="relative flex w-full flex-wrap items-stretch">
             <Link href="/student/assignments">
             <button
-              className="bg-blueGray-700 active:bg-blueGray-600 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+              className="bg-blueGray-700 active:bg-blueGray-600 text-white font-bold uppercase text-s px-8 py-4 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
               type="button"
             >
               Back
             </button>
           </Link>
+         
+            <button
+              className="bg-blueGray-700 active:bg-blueGray-600 text-white font-bold uppercase text-s px-8 py-4 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+              type="button"
+              onClick={submitAssignment}
+            >
+       Submit
+            </button>
+      
             </div>
             {/* <select name="class" id="class">
               <option disabled>Choose an assignment</option>
