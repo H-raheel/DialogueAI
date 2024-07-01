@@ -1,6 +1,6 @@
+import Link from "next/link";
 import PropTypes from "prop-types";
 import React from "react";
-
 // Dummy data
 const dummyData = {
   assignments: [
