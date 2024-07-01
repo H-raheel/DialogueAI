@@ -556,6 +556,61 @@ def update_chat_history_mistakes_for_immediate_feedback():
     return "success"
 
 
+@app.route('/api/get_student_highest_lowest_achievements', methods=['POST'])
+def get_student_highest_lowest_achievements_for_teachers_dashboard():
+    """
+        Endpoint to retrieve students' achievements based on the number of errors in assignments.
+
+    Request Body:
+        - teacher_id (str): The ID of the teacher whose students' achievements are being queried.
+
+    Returns:
+        - JSON response containing two lists:
+            - highest_achievers: List of students with the fewest errors.
+            - needs_improvement: List of students with the most errors.
+    """
+    req = request.get_json()
+    teacher_id = req.get('user_id')
+
+    if not teacher_id:
+        return jsonify({"error": "teacher_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    assignments = db_assignments.find({"assigner": teacher_id})
+
+    student_errors = {}
+    for assignment in assignments:
+        user_id = assignment['user_id']
+        total_errors = assignment['grammar_errors'] + assignment['tone_errors'] + assignment['vocabulary_errors']
+        if user_id in student_errors:
+            student_errors[user_id] += total_errors
+        else:
+            student_errors[user_id] = total_errors
+
+    sorted_students = sorted(student_errors.items(), key=lambda item: item[1])
+
+    total_students = len(sorted_students)
+    split_point = (total_students + 1) // 2  # Ensure extra student goes to highest achievers if odd number
+
+    highest_achievers = sorted_students[:split_point]
+    needs_improvement = sorted_students[split_point:]
+
+    # Fetch student names from user_id
+    def get_student_names(students):
+        result = []
+        for user_id, errors in students:
+            user = db.users.find_one({"user_id": user_id})
+            if user:
+                result.append({"name": user['name'], "errors": errors})
+        return result
+
+    response = {
+        "highest_achievers": get_student_names(highest_achievers),
+        "needs_improvement": get_student_names(needs_improvement)
+    }
+
+    return jsonify(response)
+
 @app.route('/api/get_header_statistics_for_teacher', methods=['GET'])
 def get_header_statistics_for_teacher():
     """
