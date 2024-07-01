@@ -5,48 +5,48 @@ import React from "react";
 const dummyData = {
    assignments : [
     {
-        viewId: 1,
+        chatId: 1,
         studentName: "John Doe",
         class: "3A",
         assignmentNumber: "Assignment 1",
         dueDate: "10 August",
-        submitDate: "15 August",
+       
         submitted: "Yes"
     },
     {
-        viewId: 2,
+      chatId: 2,
         studentName: "Jane Smith",
         class: "2B",
         assignmentNumber: "Assignment 2",
         dueDate: "15 August",
-        submitDate: "",
+      
         submitted: "No"
     },
     {
-        viewId: 3,
+      chatId: 3,
         studentName: "Alice Johnson",
         class: "1C",
         assignmentNumber: "Assignment 3",
         dueDate: "5 August",
-        submitDate: "10 August",
+       
         submitted: "Yes"
     },
     {
-        viewId: 4,
+      chatId: 4,
         studentName: "Bob Brown",
         class: "4A",
         assignmentNumber: "Assignment 4",
         dueDate: "1 August",
-        submitDate: "5 August",
+       
         submitted: "Yes"
     },
     {
-        viewId: 5,
+      chatId: 5,
         studentName: "Charlie Davis",
         class: "3B",
         assignmentNumber: "Assignment 5",
         dueDate: "20 August",
-        submitDate: "",
+   
         submitted: "No"
     },
 ]
@@ -136,16 +136,7 @@ export default function CardTable({ color }) {
                 >
                 Submitted
                 </th>
-                <th
-                  className={
-                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
-                    (color === "light"
-                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
-                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
-                  }
-                >
-                Submit Date
-                </th>
+             
                 <th
                   className={
                     "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
@@ -176,9 +167,7 @@ export default function CardTable({ color }) {
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                     {item.submitted}
                   </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.submitDate}
-                  </td>
+                 
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                     <button className="bg-blue-500 text-white py-1 px-3 rounded">
                       View

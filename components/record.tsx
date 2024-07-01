@@ -256,8 +256,8 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
       }
          await fetchData();
         await fetchFeedback();
-        //    updateDB();
-         //update_chat_history
+            updateDB();
+         
 
    
   };

@@ -1,17 +1,48 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
-// components
+// Dummy data
+const dummyData = {
+  assignments: [
+    {
+      chatId: 1,
+ assignmentNumber: "Assignment 1",
+      dueDate: "10 August",
+ submitted: "Yes",
+    },
+    {
+      chatId: 2,
+ assignmentNumber: "Assignment 2",
+      dueDate: "15 August",
+        submitted: "No",
+    },
+    {
+      chatId: 3,
+      studentName: "Alice Johnson",
+ assignmentNumber: "Assignment 3",
+      dueDate: "5 August",
 
-import TableDropdown from "../Dropdowns/TableDropdown.js";
+      submitted: "Yes",
+    },
+    {
+      chatId: 4,
+assignmentNumber: "Assignment 4",
+      dueDate: "1 August",
 
-export default function CardTable({ role, color }) {
-  let href;
-  if (role === "teacher") {
-    href = "/teacher/dashboard";
-  } else {
-    href = "/student/dashboard";
-  }
+      submitted: "Yes",
+    },
+    {
+      chatId: 5,
+ assignmentNumber: "Assignment 5",
+      dueDate: "20 August",
+  submitted: "No",
+    },
+  ],
+};
+
+export default function CardTable({ color }) {
+  const data = dummyData.assignments;
+
   return (
     <>
       <div
@@ -29,21 +60,13 @@ export default function CardTable({ role, color }) {
                   (color === "light" ? "text-blueGray-700" : "text-white")
                 }
               >
-                Assignment List
+                Assignments
               </h3>
             </div>
-            <a href={href}>
-              <button
-                className="bg-blueGray-700 active:bg-blueGray-600 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-                type="button"
-              >
-                Back
-              </button>
-            </a>
           </div>
         </div>
         <div className="block w-full overflow-x-auto">
-          {/* Projects table */}
+          {/* Table */}
           <table className="items-center w-full bg-transparent border-collapse">
             <thead>
               <tr>
@@ -55,7 +78,7 @@ export default function CardTable({ role, color }) {
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                  Assignments
+                  Assignment Number
                 </th>
                 <th
                   className={
@@ -65,7 +88,7 @@ export default function CardTable({ role, color }) {
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                  Deadline
+                  Due Date
                 </th>
                 <th
                   className={
@@ -75,7 +98,18 @@ export default function CardTable({ role, color }) {
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                  Status
+                  Submitted
+                </th>
+
+                <th
+                  className={
+                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
+                    (color === "light"
+                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
+                  }
+                >
+                  View
                 </th>
                 <th
                   className={
@@ -85,242 +119,42 @@ export default function CardTable({ role, color }) {
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                  Class:
+                  Start Assignment
                 </th>
-                <th
-                  className={
-                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
-                    (color === "light"
-                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
-                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
-                  }
-                >
-                  Completion
-                </th>
-                <th
-                  className={
-                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
-                    (color === "light"
-                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
-                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
-                  }
-                ></th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
-                  <img
-                    src="/img/bootstrap.jpg"
-                    className="h-12 w-12 bg-white rounded-full border"
-                    alt="..."
-                  ></img>{" "}
-                  <span
-                    className={
-                      "ml-3 font-bold " +
-                      +(color === "light" ? "text-blueGray-600" : "text-white")
-                    }
-                  >
-                    Argon Design System
-                  </span>
-                </th>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  12th May 2024
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <i className="fas fa-circle text-orange-500 mr-2"></i> pending
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  1B
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <div className="flex items-center">
-                    <span className="mr-2">60%</span>
-                    <div className="relative w-full">
-                      <div className="overflow-hidden h-2 text-xs flex rounded bg-red-200">
-                        <div
-                          style={{ width: "60%" }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
-                  <TableDropdown />
-                </td>
-              </tr>
-              <tr>
-                <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
-                  <img
-                    src="/img/angular.jpg"
-                    className="h-12 w-12 bg-white rounded-full border"
-                    alt="..."
-                  ></img>{" "}
-                  <span
-                    className={
-                      "ml-3 font-bold " +
-                      +(color === "light" ? "text-blueGray-600" : "text-white")
-                    }
-                  >
-                    Angular Now UI Kit PRO
-                  </span>
-                </th>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  11th August 2024
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <i className="fas fa-circle text-emerald-500 mr-2"></i>{" "}
-                  completed
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  2A
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <div className="flex items-center">
-                    <span className="mr-2">100%</span>
-                    <div className="relative w-full">
-                      <div className="overflow-hidden h-2 text-xs flex rounded bg-emerald-200">
-                        <div
-                          style={{ width: "100%" }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
-                  <TableDropdown />
-                </td>
-              </tr>
-              <tr>
-                <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
-                  <img
-                    src="/img/sketch.jpg"
-                    className="h-12 w-12 bg-white rounded-full border"
-                    alt="..."
-                  ></img>{" "}
-                  <span
-                    className={
-                      "ml-3 font-bold " +
-                      +(color === "light" ? "text-blueGray-600" : "text-white")
-                    }
-                  >
-                    Black Dashboard Sketch
-                  </span>
-                </th>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  18th March 2024
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <i className="fas fa-circle text-red-500 mr-2"></i> Incomplete
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  1B
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <div className="flex items-center">
-                    <span className="mr-2">0%</span>
-                    <div className="relative w-full">
-                      <div className="overflow-hidden h-2 text-xs flex rounded bg-red-200">
-                        <div
-                          style={{ width: "0%" }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
-                  <TableDropdown />
-                </td>
-              </tr>
-              <tr>
-                <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
-                  <img
-                    src="/img/react.jpg"
-                    className="h-12 w-12 bg-white rounded-full border"
-                    alt="..."
-                  ></img>{" "}
-                  <span
-                    className={
-                      "ml-3 font-bold " +
-                      +(color === "light" ? "text-blueGray-600" : "text-white")
-                    }
-                  >
-                    React Material Dashboard
-                  </span>
-                </th>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  9th May 2024
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <i className="fas fa-circle text-orange-500 mr-2"></i> 
-                  pending
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  2B
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <div className="flex items-center">
-                    <span className="mr-2">90%</span>
-                    <div className="relative w-full">
-                      <div className="overflow-hidden h-2 text-xs flex rounded bg-teal-200">
-                        <div
-                          style={{ width: "90%" }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
-                  <TableDropdown />
-                </td>
-              </tr>
-              <tr>
-                <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
-                  <img
-                    src="/img/vue.jpg"
-                    className="h-12 w-12 bg-white rounded-full border"
-                    alt="..."
-                  ></img>{" "}
-                  <span
-                    className={
-                      "ml-3 font-bold " +
-                      +(color === "light" ? "text-blueGray-600" : "text-white")
-                    }
-                  >
-                    React Material Dashboard
-                  </span>
-                </th>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  10th December 2024
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <i className="fas fa-circle text-emerald-500 mr-2"></i>{" "}
-                  completed
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  1C
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <div className="flex items-center">
-                    <span className="mr-2">100%</span>
-                    <div className="relative w-full">
-                      <div className="overflow-hidden h-2 text-xs flex rounded bg-emerald-200">
-                        <div
-                          style={{ width: "100%" }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500"
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
-                  <TableDropdown />
-                </td>
-              </tr>
+              {data.map((item, index) => (
+                <tr key={index}>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                    {item.assignmentNumber}
+                  </td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                    {item.dueDate}
+                  </td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                    {item.submitted}
+                  </td>
+
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                  <Link href={`/feedback/${item.chatId}`} >
+                    <button className="bg-blue-500 text-white py-1 px-3 rounded">
+                      View
+                    </button>
+                    </Link>
+                  </td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+
+                  <Link href={`/chat/${item.chatId}`} >
+                    
+                    <button className="bg-blue-500 text-white py-1 px-3 rounded">
+                      Complete Assignment
+                    </button>
+                   
+                    </Link>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

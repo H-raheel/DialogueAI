@@ -15,7 +15,7 @@ import withRoleProtection from "../../hoc/authWrap.jsx";
       <Sidebar/>
         <div className="w-full ml-72 mb-12 px-4">
       
-          <CardTable role="teacher" color="dark" />
+          <CardTable  color="dark" />
         </div>
       </div>
     </>

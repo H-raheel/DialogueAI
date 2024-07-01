@@ -173,6 +173,11 @@ export default function AssignmentTable({ role, color }) {
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
                     <Link href={`/chatdetails/${assignment.chat_id}`} className="px-6 py-2 text-white bg-green-600 rounded-md">
+                    DO Assignment
+                    </Link>
+                  </td>
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right">
+                    <Link href={`/chatdetails/${assignment.chat_id}`} className="px-6 py-2 text-white bg-green-600 rounded-md">
                       Details
                     </Link>
                   </td>
