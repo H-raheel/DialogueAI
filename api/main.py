@@ -363,7 +363,7 @@ def langchain_feedback():
         return jsonify({"error": "An error occurred"}), 500
 
 
-@app.route('api/get_last_six_error_summation_for_student', methods=['GET'])
+@app.route('/api/get_last_six_error_summation_for_student', methods=['GET'])
 def get_error_summation_student():
     """
     Retrieve the last 6 assignments for a given user_id and return their names and error counts.
@@ -374,9 +374,9 @@ def get_error_summation_student():
     Returns:
     - JSON response containing:
         - labels (list of str): Names of the last 6 assignments.
-        - number_of_grammar_errors (list of int): Number of grammar errors in each assignment.
-        - number_of_tone_errors (list of int): Number of tone errors in each assignment.
-        - number_of_vocabulary_errors (list of int): Number of vocabulary errors in each assignment.
+        - grammar_errors (list of int): Number of grammar errors in each assignment.
+        - tone_errors (list of int): Number of tone errors in each assignment.
+        - vocabulary_errors (list of int): Number of vocabulary errors in each assignment.
     - HTTP Status 200 if the operation is successful.
     - HTTP Status 400 if the user_id is not provided.
     - HTTP Status 404 if no assignments are found for the given user_id.
@@ -401,15 +401,15 @@ def get_error_summation_student():
             return jsonify({'error': 'No assignments found for the given user_id'}), 404
 
         labels = [assignment['name'] for assignment in assignments]
-        number_of_grammar_errors = [assignment.get('number_of_grammar_errors', 0) for assignment in assignments]
-        number_of_tone_errors = [assignment.get('number_of_tone_errors', 0) for assignment in assignments]
-        number_of_vocabulary_errors = [assignment.get('number_of_vocabulary_errors', 0) for assignment in assignments]
+        number_of_grammar_errors = [assignment.get('grammar_errors', 0) for assignment in assignments]
+        number_of_tone_errors = [assignment.get('tone_errors', 0) for assignment in assignments]
+        number_of_vocabulary_errors = [assignment.get('vocabulary_errors', 0) for assignment in assignments]
 
         response = {
             'labels': labels,
-            'number_of_grammar_errors': number_of_grammar_errors,
-            'number_of_tone_errors': number_of_tone_errors,
-            'number_of_vocabulary_errors': number_of_vocabulary_errors
+            'grammar_errors': number_of_grammar_errors,
+            'tone_errors': number_of_tone_errors,
+            'vocabulary_errors': number_of_vocabulary_errors
         }
 
         return jsonify(response), 200
@@ -418,7 +418,7 @@ def get_error_summation_student():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('api/get_last_six_error_summation_for_teacher', methods=['GET'])
+@app.route('/api/get_last_six_error_summation_for_teacher', methods=['GET'])
 def get_error_summation_teacher():
     """
     Retrieve the last 6 assignments for a given user_id and return their names and error counts.
@@ -429,9 +429,9 @@ def get_error_summation_teacher():
     Returns:
     - JSON response containing:
         - labels (list of str): Names of the last 6 assignments.
-        - number_of_grammar_errors (list of int): Number of grammar errors in each assignment.
-        - number_of_tone_errors (list of int): Number of tone errors in each assignment.
-        - number_of_vocabulary_errors (list of int): Number of vocabulary errors in each assignment.
+        - grammar_errors (list of int): Number of grammar errors in each assignment.
+        - tone_errors (list of int): Number of tone errors in each assignment.
+        - vocabulary_errors (list of int): Number of vocabulary errors in each assignment.
     - HTTP Status 200 if the operation is successful.
     - HTTP Status 400 if the user_id is not provided.
     - HTTP Status 404 if no assignments are found for the given user_id.
@@ -459,15 +459,15 @@ def get_error_summation_teacher():
             return jsonify({'error': 'No assignments found for the given user_id'}), 404
 
         labels = [assignment['name'] for assignment in assignments]
-        number_of_grammar_errors = [assignment.get('number_of_grammar_errors', 0) for assignment in assignments]
-        number_of_tone_errors = [assignment.get('number_of_tone_errors', 0) for assignment in assignments]
-        number_of_vocabulary_errors = [assignment.get('number_of_vocabulary_errors', 0) for assignment in assignments]
+        number_of_grammar_errors = [assignment.get('grammar_errors', 0) for assignment in assignments]
+        number_of_tone_errors = [assignment.get('tone_errors', 0) for assignment in assignments]
+        number_of_vocabulary_errors = [assignment.get('vocabulary_errors', 0) for assignment in assignments]
 
         response = {
             'labels': labels,
-            'number_of_grammar_errors': number_of_grammar_errors,
-            'number_of_tone_errors': number_of_tone_errors,
-            'number_of_vocabulary_errors': number_of_vocabulary_errors
+            'grammar_errors': number_of_grammar_errors,
+            'tone_errors': number_of_tone_errors,
+            'vocabulary_errors': number_of_vocabulary_errors
         }
 
         return jsonify(response), 200
@@ -529,11 +529,11 @@ def update_chat_history_mistakes_for_immediate_feedback():
     update_fields = {}
 
     if 'number_of_grammar_errors' in req:
-        update_fields['grammar_errors'] = result2.get('number_of_grammar_errors') + req['number_of_grammar_errors']
+        update_fields['grammar_errors'] = result2.get('grammar_errors') + req['grammar_errors']
     if 'number_of_tone_errors' in req:
-        update_fields['tone_errors'] = result2.get('number_of_tone_errors') + req['number_of_tone_errors']
+        update_fields['tone_errors'] = result2.get('tone_errors') + req['tone_errors']
     if 'number_of_vocabulary_errors' in req:
-        update_fields['vocabulary_errors'] = result2.get('number_of_vocabulary_errors') + req['number_of_vocabulary_errors']
+        update_fields['vocabulary_errors'] = result2.get('vocabulary_errors') + req['vocabulary_errors']
 
     if not update_fields:
         return jsonify({'error': 'No valid fields to update'}), 400
@@ -588,9 +588,9 @@ def feedback():
     number_of_vocabulary_errors = int(vocabulary_errors)
 
     return jsonify({"feedback": feedback_text_final,
-                    "number_of_grammar_errors": number_of_grammar_errors,
-                    "number_of_tone_errors": number_of_tone_errors,
-                    "number_of_vocabulary_errors": number_of_vocabulary_errors})
+                    "grammar_errors": number_of_grammar_errors,
+                    "tone_errors": number_of_tone_errors,
+                    "vocabulary_errors": number_of_vocabulary_errors})
 
 
 @app.route('/api/record_voice', methods=['POST'])
