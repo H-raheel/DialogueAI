@@ -555,7 +555,7 @@ def update_chat_history_mistakes_for_immediate_feedback():
     return "success"
 
 
-@app.route('/api/get_header_statistics_for_teacher', methods=['GET'])
+@app.route('/api/get_header_statistics_for_teacher', methods=['POST'])
 def get_header_statistics_for_teacher():
     """
     GET endpoint to fetch statistics for a teacher based on assignments.
