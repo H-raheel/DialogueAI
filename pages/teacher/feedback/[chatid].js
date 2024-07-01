@@ -6,6 +6,7 @@ import React from "react";
 import HeaderStats from "../../../components/Headers/feedbackHeaderStatsTeacher.js";
 import Sidebar from "../../../components/Sidebar/SidebarTeacher.js";
 import Dashboard from "../../../components/feedbackDashboard.js";
+import withRoleProtection from "../../../hoc/authWrap.jsx";
 const props={
   assignment:"Assignment 1",
   name:"StudentName",
@@ -14,7 +15,7 @@ const props={
   ,duedate:"12 August"
 
 }
- export default function feedbackDashboard() {
+ function feedbackDashboard() {
 
     const router = useRouter();
     const { chatid } = router.query;
@@ -36,4 +37,6 @@ const props={
   );
 }
 
+
+export default withRoleProtection(feedbackDashboard,['teacher'])
 

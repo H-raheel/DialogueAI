@@ -1,10 +1,43 @@
-import React from "react";
-
-// components
-
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import CardStats from "../Cards/CardStats.js";
 
-export default function HeaderStats(role) {
+export default function HeaderStats() {
+  const [data, setData] = useState({
+    best_performing_student: "",
+    worst_performing_student: "",
+    language: "",
+    number_of_assignments: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const id = useSelector((state) => state.user);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/get_header_statistics_for_teacher", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ user_id: id }),
+        });
+       
+        const fetchedData = await response.json();
+        setData(fetchedData);
+        console.log(fetchedData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
   return (
     <>
       {/* Header */}
@@ -15,8 +48,8 @@ export default function HeaderStats(role) {
             <div className="flex flex-wrap">
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle={role=="teacher"?"Total Classes":"Language"}
-                  statTitle={role=="teacher"?"120":"5"}
+                  statSubtitle="Language"
+                  statTitle={loading ? <Loader /> : data.language}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -27,8 +60,8 @@ export default function HeaderStats(role) {
               </div>
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle={role=="teacher"?"Total Due Assignments":"Assignments Given"}
-                  statTitle="12"
+                  statSubtitle="Assignments Given"
+                  statTitle={loading ? <Loader /> : data.number_of_assignments}
                   statArrow=""
                   statPercent=""
                   statPercentColor=""
@@ -38,37 +71,27 @@ export default function HeaderStats(role) {
                 />
               </div>
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
-                {/* <CardStats
-                  statSubtitle="SALES"
-                  statTitle="924"
-                  statArrow="down"
-                  statPercent="1.10"
-                  statPercentColor="text-orange-500"
-                  statDescripiron="Since yesterday"
-                  statIconName="fas fa-users"
-                  statIconColor="bg-pink-500"
-                /> */}
                 <CardStats
-                  statSubtitle="Best Performing Class"
-                  statTitle="2A"
+                  statSubtitle="Needs Improvement"
+                  statTitle={loading ? <Loader /> : data.worst_performing_student}
+                  statArrow=""
+                  statPercent=""
+                  statPercentColor=""
+                  statDescripiron=""
+                  statIconName="fas fa-frown"
+                  statIconColor="bg-red-500"
+                />
+              </div>
+              <div className="font-light w-full lg:w-6/12 xl:w-3/12 px-4">
+                <CardStats
+                  statSubtitle="Star Performer"
+                  statTitle={loading ? <Loader /> : data.best_performing_student}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
                   statDescripiron=""
                   statIconName="fas fa-smile-beam"
                   statIconColor="bg-green-500"
-                />
-              </div>
-              <div className="font-light w-full lg:w-6/12 xl:w-3/12 px-4">
-                <CardStats
-                  statSubtitle="Worst Performing Class"
-                  statTitle="2C"
-                  statArrow=""
-                  statPercent=""
-                  statPercentColor="text-emerald-500"
-                  statDescripiron=""
-                  statIconName="fas fa-frown"
-                  statIconColor="bg-red-500"
                 />
               </div>
             </div>
@@ -78,3 +101,8 @@ export default function HeaderStats(role) {
     </>
   );
 }
+
+
+const Loader = () => (
+  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-500"></div>
+);

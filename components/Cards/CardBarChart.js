@@ -6,13 +6,67 @@ export default function CardBarChart() {
   const [data, setData] = useState(null);
   const role = useSelector((state) => state.role);
   const user = useSelector((state) => state.user);
+
+  const transformData = (data) => {
+    // Initialize arrays to store transformed data
+    let labels = [];
+    let grammarErrors = [];
+    let toneErrors = [];
+    let vocabularyErrors = [];
+  
+    // Iterate through each object in the input data
+    data.forEach((assignment) => {
+      // Extract values from each assignment object
+      labels.push(assignment.assignment_id);
+      grammarErrors.push(assignment.total_grammar_errors);
+      toneErrors.push(assignment.total_tone_errors);
+      vocabularyErrors.push(assignment.total_vocabulary_errors);
+    });
+  
+    // Construct the transformed object
+    const transformedData = {
+      labels: labels,
+      grammar_errors: grammarErrors,
+      tone_errors: toneErrors,
+      vocabulary_errors: vocabularyErrors,
+    };
+  
+    return transformedData;
+  };
+  
+  // Example usage:
+  const inputData = [
+    {
+      assignment_id: "assignment_en_1",
+      total_grammar_errors: 22,
+      total_tone_errors: 48,
+      total_vocabulary_errors: 25,
+    },
+    {
+      assignment_id: "assignment_en_2",
+      total_grammar_errors: 0,
+      total_tone_errors: 0,
+      total_vocabulary_errors: 0,
+    },
+    {
+      assignment_id: "assignment_en_3",
+      total_grammar_errors: 10,
+      total_tone_errors: 22,
+      total_vocabulary_errors: 11,
+    },
+  ];
+  
+  const transformed = transformData(inputData);
+  console.log(transformed);
+  
+
   useEffect(() => {
-    console.log("heer")
+   
     // Simulate API call
     const fetchStudentData = async () => {
     //  setLoading(true);
       try {
-        console.log("incalla")
+       
         const response = await fetch("/api/get_last_six_error_summation_for_student", {
           method: "POST",
           headers: {
@@ -30,11 +84,35 @@ export default function CardBarChart() {
      //   setLoading(false);
       }
     };
-
-    fetchStudentData();
+    const fetchTeacherData = async () => {
+      //  setLoading(true);
+        try {
+         
+          const response = await fetch("/api/get_bar_statistics_for_teacher", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ user_id: user }),
+          });
+          const fetchedData = await response.json();
+          console.log(fetchedData)
+          setData(transformData(fetchedData));
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+       //   setLoading(false);
+        }
+      };
+role=="student"?
+    fetchStudentData():
+    
+    fetchTeacherData();
   }, []);
 
   useEffect(() => {
+
     if (data) {
       const config = {
         type: "bar",
@@ -169,13 +247,26 @@ export default function CardBarChart() {
             </div>
           </div>
         </div>
-        <div className="p-4 flex-auto">
+        <div className="p-4 flex-auto justify-center items-center">
           {/* Chart */}
+        
           <div className="relative h-350-px">
+          {data==null?
+          (
+          <div className="flex flex-col justify-center items-center">
+          <Loader/>
+          </div>):
             <canvas id="bar-chart"></canvas>
-          </div>
+          
+}
+</div>
         </div>
       </div>
     </>
   );
 }
+
+
+const Loader = () => (
+  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-500"></div>
+);

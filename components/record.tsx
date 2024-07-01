@@ -12,10 +12,10 @@ declare global {
 
 export default function MicrophoneComponent({ chatid }: ChatId) {
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingComplete, setRecordingComplete] = useState(false);
+  //const [recordingComplete, setRecordingComplete] = useState(false);
   const [fulltranscript, setTranscript] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [language, setLanguage] = useState("");
+ // const [language, setLanguage] = useState("");
   const [sentTranscription, setSentTranscription] = useState("");
  
   const [chatHistory, setChatHistory] = useState<any>([]);
@@ -124,9 +124,13 @@ let fetchedData=({
         });
         const data = await response.json();
         fulltranscript.push(data.transcription);
+        if (fulltranscript[fulltranscript.length-1] != "" ) {
+          chatHistory.push({ role: "Human", content: fulltranscript[fulltranscript.length-1] });
+          //chatHistory.push({ role: "AI", content: message });
+        }
         console.log("trans fethed", data);
         console.log("inside", data.transcription);
-        setSentTranscription(data.transcription);
+       // setSentTranscription(data.transcription);
         console.log("Transcription over heree:", sentTranscription);
         console.log(fulltranscript);
         console.log("data is set noww");
@@ -174,14 +178,14 @@ let fetchedData=({
   }
 
   const stopRecording = async () => {
-    setDisabled(false);
+ 
     setIsRecording(false);
     console.log("recstopped");
     console.log(fulltranscript);
 
     // if (recognitionRef.current) {
     // recognitionRef.current.stop();
-    setRecordingComplete(true);
+   // setRecordingComplete(true);
    // let totalTranscript = joinStringsLowercase(fulltranscript[fulltranscript.length-1]);
    // console.log("total transcript:", totalTranscript);
     const fetchData = async () => {
@@ -201,7 +205,7 @@ let fetchedData=({
      //   console.log("totalTranscript2:", totalTranscript);
         //   console.log('botMessage:', botMessage)
         if (fulltranscript[fulltranscript.length-1] != "" && message != "") {
-          chatHistory.push({ role: "Human", content: fulltranscript[fulltranscript.length-1] });
+         // chatHistory.push({ role: "Human", content: fulltranscript[fulltranscript.length-1] });
           chatHistory.push({ role: "AI", content: message });
         }
         console.log("chatHistory:", chatHistory);
@@ -210,6 +214,7 @@ let fetchedData=({
       } catch (error) {
         console.error("Error fetching data:", error);
       }
+      finally{   setDisabled(false);}
     };
     const fetchFeedback = async () => {
       try {
@@ -264,8 +269,8 @@ let fetchedData=({
             "vocabulary_errors": fetchedData.vocabulary_errors,
           }),
         });
-        const fetched = await response.json();
-        console.log("fetched data", fetched);
+        // const fetched = await response.json();
+        // console.log("fetched data", fetched);
         // feedback.push({content:fetchedData.feedback})
         // console.log(feedback)
         // setTranscript([]);
@@ -276,7 +281,7 @@ let fetchedData=({
     };
     await fetchData();
     await fetchFeedback();
-    await updateDB();
+     updateDB();
   };
 
   const handleToggleRecording = () => {
@@ -322,8 +327,8 @@ let fetchedData=({
           <button
             onClick={startRecording}
             disabled={disabled}
-            className={`mt-10 m-auto flex items-center justify-center ${
-              isRecording
+            className={`mt- m-auto flex items-center justify-center ${
+              isRecording || disabled
                 ? "bg-gray-600 hover:bg-gray-500"
                 : "bg-blue-400 hover:bg-blue-500"
             } rounded-full w-20 h-20 focus:outline-none`}

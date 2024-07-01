@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 
 from flask import Flask, request, flash, jsonify
 from langchain_core.prompts import PromptTemplate
@@ -555,13 +556,68 @@ def update_chat_history_mistakes_for_immediate_feedback():
     return "success"
 
 
+@app.route('/api/get_student_highest_lowest_achievements', methods=['POST'])
+def get_student_highest_lowest_achievements_for_teachers_dashboard():
+    """
+        Endpoint to retrieve students' achievements based on the number of errors in assignments.
+
+    Request Body:
+        - user_id (str): The ID of the teacher whose students' achievements are being queried.
+
+    Returns:
+        - JSON response containing two lists:
+            - highest_achievers: List of students with the fewest errors.
+            - needs_improvement: List of students with the most errors.
+    """
+    req = request.get_json()
+    teacher_id = req.get('user_id')
+
+    if not teacher_id:
+        return jsonify({"error": "teacher_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    assignments = db_assignments.find({"assigner": teacher_id})
+
+    student_errors = {}
+    for assignment in assignments:
+        user_id = assignment['user_id']
+        total_errors = assignment['grammar_errors'] + assignment['tone_errors'] + assignment['vocabulary_errors']
+        if user_id in student_errors:
+            student_errors[user_id] += total_errors
+        else:
+            student_errors[user_id] = total_errors
+
+    sorted_students = sorted(student_errors.items(), key=lambda item: item[1])
+
+    total_students = len(sorted_students)
+    split_point = (total_students + 1) // 2  # Ensure extra student goes to highest achievers if odd number
+
+    highest_achievers = sorted_students[:split_point]
+    needs_improvement = sorted_students[split_point:]
+
+    # Fetch student names from user_id
+    def get_student_names(students):
+        result = []
+        for user_id, errors in students:
+            user = db.users.find_one({"user_id": user_id})
+            if user:
+                result.append({"name": user['name'], "errors": errors})
+        return result
+
+    response = {
+        "highest_achievers": get_student_names(highest_achievers),
+        "needs_improvement": get_student_names(needs_improvement)
+    }
+
+    return jsonify(response)
+
 @app.route('/api/get_header_statistics_for_teacher', methods=['POST'])
 def get_header_statistics_for_teacher():
     """
     GET endpoint to fetch statistics for a teacher based on assignments.
 
     Parameters:
-    - teacher_id (str): The ID of the teacher whose statistics are to be retrieved.
+    - user_id (str): The ID of the teacher whose statistics are to be retrieved.
 
     Returns:
     - JSON response containing:
@@ -571,8 +627,8 @@ def get_header_statistics_for_teacher():
       - "language": languages for which the teacher is in-charge.
 
     Errors:
-    - 400 if 'teacher_id' parameter is missing.
-    - 404 if no assignments are found for the given teacher_id.
+    - 400 if 'user_id' parameter is missing.
+    - 404 if no assignments are found for the given user_id.
     """
     req = request.get_json()
     teacher_id = req.get('user_id')
@@ -617,6 +673,57 @@ def get_header_statistics_for_teacher():
         "worst_performing_student": worst_student_name,
         "number_of_assignments": number_of_assignments
     })
+
+
+@app.route('/api/get_bar_statistics_for_teacher', methods=['POST'])
+def get_bar_statistics_for_teacher():
+    """
+    Fetch and aggregate error statistics for assignments assigned by a specific teacher.
+
+    Request Body (JSON):
+    - user_id (str): The ID of the teacher.
+
+    Response (JSON):
+    - List of dictionaries, each containing:
+        - assignment_id (str): The assignment ID.
+        - total_grammar_errors (int): Total grammar errors for the assignment.
+        - total_tone_errors (int): Total tone errors for the assignment.
+        - total_vocabulary_errors (int): Total vocabulary errors for the assignment.
+    """
+    req = request.get_json()
+    teacher_id = req.get('user_id')
+
+    if not teacher_id:
+        return jsonify({"error": "teacher_id is required"}), 400
+
+    # Fetch all assignments for the given teacher_id
+    db_assignments = connect().Main.assignments
+    assignments = db_assignments.find({"assigner": teacher_id})
+
+    # Aggregate errors by assignment_id
+    error_summary = defaultdict(
+        lambda: {"total_grammar_errors": 0, "total_tone_errors": 0, "total_vocabulary_errors": 0})
+
+    for assignment in assignments:
+        assignment_id = assignment.get('assignment_id')
+        error_summary[assignment_id]["total_grammar_errors"] += assignment.get('grammar_errors', 0)
+        error_summary[assignment_id]["total_tone_errors"] += assignment.get('tone_errors', 0)
+        error_summary[assignment_id]["total_vocabulary_errors"] += assignment.get('vocabulary_errors', 0)
+
+    # Format the result
+    results = []
+    print(f"error_summary = {error_summary}")
+
+    for assignment_id, errors in error_summary.items():
+        result = {
+            "assignment_id": assignment_id,
+            "total_grammar_errors": errors["total_grammar_errors"],
+            "total_tone_errors": errors["total_tone_errors"],
+            "total_vocabulary_errors": errors["total_vocabulary_errors"]
+        }
+        results.append(result)
+
+    return jsonify(results)
 
 
 @app.route('/api/immediate_feedback', methods=['POST'])

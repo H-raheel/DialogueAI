@@ -1,7 +1,5 @@
 import React from "react";
-
 // components
-import FooterAdmin from "../../components/Footers/FooterAdmin.js";
 import HeaderStats from "../../components/Headers/HeaderStats.js";
 import Sidebar from "../../components/Sidebar/SidebarTeacher.js";
 import Dashboard from "../../components/dashboard.js";

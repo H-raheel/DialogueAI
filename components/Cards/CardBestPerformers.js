@@ -1,26 +1,37 @@
-import React from "react";
-
-// Dummy data for API
-const dummyData = {
-  highAchievers: [
-    "Student 1",
-    "Student 2",
-    "Student 3",
-    "Student 4",
-    "Student 5",
-  ],
-  needsImprovement: [
-    "Student 6",
-    "Student 7",
-    "Student 8",
-    "Student 9",
-    "Student 10",
-  ],
-};
-
-// components
-
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 export default function CardStudentsPerformance() {
+  const [loading, setLoading] = useState(true);
+  const [highAchievers, setHighAchievers] = useState([]);
+  const [needsImprovement, setNeedsImprovement] = useState([]);
+  const user = useSelector((state) => state.user);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+       
+        const response = await fetch("/api/get_student_highest_lowest_achievements", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ user_id: user }),
+        });
+        const data = await response.json();
+       console.log(data)
+        setHighAchievers(data.highAchievers);
+        setNeedsImprovement(data.needsImprovement);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <>
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
@@ -31,19 +42,9 @@ export default function CardStudentsPerformance() {
                 Students Performance
               </h3>
             </div>
-            {/* <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
-              <button
-                className="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                type="button"
-              >
-                (languagedropdown)
-              
-              </button>
-            </div> */}
           </div>
         </div>
         <div className="block w-full overflow-x-auto">
-       
           <table className="items-center w-full bg-transparent border-collapse">
             <thead className="thead-light">
               <tr>
@@ -56,16 +57,24 @@ export default function CardStudentsPerformance() {
               </tr>
             </thead>
             <tbody className="text-black">
-              {dummyData.highAchievers.map((student, index) => (
-                <tr key={index}>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {student}
-                  </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {dummyData.needsImprovement[index] || "N/A"}
+              {loading ? (
+                <tr>
+                  <td colSpan="2" className="text-center py-4">
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : (
+                highAchievers.map((student, index) => (
+                  <tr key={index}>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                      {student}
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                      {needsImprovement[index] || "N/A"}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
