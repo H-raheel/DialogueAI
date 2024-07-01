@@ -363,28 +363,75 @@ def langchain_feedback():
         return jsonify({"error": "An error occurred"}), 500
 
 
+@app.route('/api/assignment_submitted', methods=['POST'])
+def update_assignment_is_submitted():
+    req = request.get_json()
+    assignment_db = connect().Main.assignments
+
+    if not req or not 'chat_id' in req:
+        return jsonify({'error': 'Invalid input'}), 400
+
+    chat_id = req['chat_id']
+
+    result = assignment_db.update_one(
+        {'chat_id': chat_id},
+        {'$set': {'is_submitted': True}}
+    )
+
+    if result.matched_count == 0:
+        return jsonify({'error': 'Assignment not found'}), 404
+
+    return jsonify({'message': 'Assignment submission status updated successfully'}), 200
+
 @app.route('/api/update_chat_history', methods=['POST'])
-def update_chat_history():
+def update_chat_history_mistakes_for_immediate_feedback():
+    print(f"inside update_chat_history")
     req = request.get_json()
     text_human = req.get('text')
     feedback_ai = req.get('feedback')
 
     db = connect().Chat.session
-    chatid = req['chatid']
-    obj = ObjectId(chatid)
+    db2 = connect().Main.assignments
+
+    chat_id = req['chatid']
+    obj = ObjectId(chat_id)
+
+    # Updating chat_history
     result = db.find({"_id": obj})
-
     result = result[0]
-
     message_history = result["chat"]
     message_history += f"\nHuman: {text_human}\n"
 
     message_history += f"AI: {feedback_ai}\n"
+
+    print(f"message_history = {message_history}")
+
     db.update_one(
         {"_id": obj},
         {"$set": {"message_history": message_history}}
     )
 
+    # Updating assignments collection with the mistakes
+    result2 = db2.find({"chat_id": chat_id})
+    result2 = result2[0]
+    update_fields = {}
+
+    if 'number_of_grammar_errors' in req:
+        update_fields['grammar_errors'] = result2.get('number_of_grammar_errors') + req['number_of_grammar_errors']
+    if 'number_of_tone_errors' in req:
+        update_fields['tone_errors'] = result2.get('number_of_tone_errors') + req['number_of_tone_errors']
+    if 'number_of_vocabulary_errors' in req:
+        update_fields['vocabulary_errors'] = result2.get('number_of_vocabulary_errors') + req['number_of_vocabulary_errors']
+
+    if not update_fields:
+        return jsonify({'error': 'No valid fields to update'}), 400
+
+    result2.update_one(
+        {'chat_id': chat_id},
+        {'$set': update_fields}
+    )
+
+    return "success"
 
 @app.route('/api/immediate_feedback', methods=['POST'])
 def feedback():
