@@ -562,7 +562,7 @@ def get_student_highest_lowest_achievements_for_teachers_dashboard():
         Endpoint to retrieve students' achievements based on the number of errors in assignments.
 
     Request Body:
-        - teacher_id (str): The ID of the teacher whose students' achievements are being queried.
+        - user_id (str): The ID of the teacher whose students' achievements are being queried.
 
     Returns:
         - JSON response containing two lists:
@@ -617,7 +617,7 @@ def get_header_statistics_for_teacher():
     GET endpoint to fetch statistics for a teacher based on assignments.
 
     Parameters:
-    - teacher_id (str): The ID of the teacher whose statistics are to be retrieved.
+    - user_id (str): The ID of the teacher whose statistics are to be retrieved.
 
     Returns:
     - JSON response containing:
@@ -627,8 +627,8 @@ def get_header_statistics_for_teacher():
       - "language": languages for which the teacher is in-charge.
 
     Errors:
-    - 400 if 'teacher_id' parameter is missing.
-    - 404 if no assignments are found for the given teacher_id.
+    - 400 if 'user_id' parameter is missing.
+    - 404 if no assignments are found for the given user_id.
     """
     req = request.get_json()
     teacher_id = req.get('user_id')
