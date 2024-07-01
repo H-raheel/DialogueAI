@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 
 from flask import Flask, request, flash, jsonify
 from langchain_core.prompts import PromptTemplate
@@ -617,6 +618,57 @@ def get_header_statistics_for_teacher():
         "worst_performing_student": worst_student_name,
         "number_of_assignments": number_of_assignments
     })
+
+
+@app.route('/api/get_bar_statistics_for_teacher', methods=['GET'])
+def get_bar_statistics_for_teacher():
+    """
+    Fetch and aggregate error statistics for assignments assigned by a specific teacher.
+
+    Request Body (JSON):
+    - user_id (str): The ID of the teacher.
+
+    Response (JSON):
+    - List of dictionaries, each containing:
+        - assignment_id (str): The assignment ID.
+        - total_grammar_errors (int): Total grammar errors for the assignment.
+        - total_tone_errors (int): Total tone errors for the assignment.
+        - total_vocabulary_errors (int): Total vocabulary errors for the assignment.
+    """
+    req = request.get_json()
+    teacher_id = req.get('user_id')
+
+    if not teacher_id:
+        return jsonify({"error": "teacher_id is required"}), 400
+
+    # Fetch all assignments for the given teacher_id
+    db_assignments = connect().Main.assignments
+    assignments = db_assignments.find({"assigner": teacher_id})
+
+    # Aggregate errors by assignment_id
+    error_summary = defaultdict(
+        lambda: {"total_grammar_errors": 0, "total_tone_errors": 0, "total_vocabulary_errors": 0})
+
+    for assignment in assignments:
+        assignment_id = assignment.get('assignment_id')
+        error_summary[assignment_id]["total_grammar_errors"] += assignment.get('grammar_errors', 0)
+        error_summary[assignment_id]["total_tone_errors"] += assignment.get('tone_errors', 0)
+        error_summary[assignment_id]["total_vocabulary_errors"] += assignment.get('vocabulary_errors', 0)
+
+    # Format the result
+    results = []
+    print(f"error_summary = {error_summary}")
+
+    for assignment_id, errors in error_summary.items():
+        result = {
+            "assignment_id": assignment_id,
+            "total_grammar_errors": errors["total_grammar_errors"],
+            "total_tone_errors": errors["total_tone_errors"],
+            "total_vocabulary_errors": errors["total_vocabulary_errors"]
+        }
+        results.append(result)
+
+    return jsonify(results)
 
 
 @app.route('/api/immediate_feedback', methods=['POST'])
