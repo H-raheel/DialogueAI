@@ -153,30 +153,38 @@ def openChat():
     assignmentid = result['assignment_id']
     userid = result['user_id']
 
-    history = updateMemory(assignmentid, userid)
-    history = [{'role': 'Human' if (idx+1) % 2 else 'AI', 'content': i.split(": ")[1]} for idx, i in enumerate(history)]
+    chat_history, feedback_history = update_memory(assignmentid, userid)
+    chat_history = [{'role': 'Human' if (idx + 1) % 2 else 'AI', 'content': i.split(": ")[1]} for idx, i in
+                    enumerate(chat_history)]
+    feedback_history = [{'role': 'Human' if (idx + 1) % 2 else 'AI', 'content': i.split(":x ")[1]} for idx, i in
+                        enumerate(feedback_history)]
+
     # human, AI, human, AI pattern
-    return {'chatHistory': history}
+    return {'chatHistory': chat_history, 'feedback_history': feedback_history}
 
 
-def updateMemory(assignmentid, userid):
-    #updates global conversation memory
+def update_memory(assignmentid, userid):
+    # updates global conversation memory
     global conversation
-    #{"$and":[{"name": "name"}, {"date": "date"}]}
-    db = connect().Chat.session
-    result = db.find({ "$and": [{"assignment_id": assignmentid}, {"user_id": userid}] }).sort('created',pymongo.ASCENDING) #oldest first
-    result = result[0]["chat"]
-    result = result.split("\n")
+    # {"$and":[{"name": "name"}, {"date": "date"}]}
+    db_chat = connect().Chat.session
+    result = db_chat.find({ "$and": [{"assignment_id": assignmentid}, {"user_id": userid}] }).sort('created',pymongo.ASCENDING) #oldest first
+    chat_history = result[0]["chat"]
+    chat_history = chat_history.split("\n")
+
+    feedback_history = result[0]["message_history"]
+    feedback_history = feedback_history.split("\n")
+
     memory = ConversationSummaryBufferMemory(
         llm=chat, max_token_limit=4096
     )
     conversation.memory = memory
-    for i in range(0, len(result), 2):
-        inp = result[i].split(": ")[1]
-        out = result[i+1].split(": ")[1]
+    for i in range(0, len(chat_history), 2):
+        inp = chat_history[i].split(": ")[1]
+        out = chat_history[i+1].split(": ")[1]
         conversation.memory.save_context({"input": inp}, {"output": out})
 
-    return result
+    return chat_history, feedback_history
 
 @app.route('/api/assign', methods=['GET', 'POST'])
 def assign():
@@ -517,19 +525,23 @@ def update_chat_history_mistakes_for_immediate_feedback():
 
     # Updating message_history of feedbacks
     message_history = result["message_history"]
-    message_history += f"\nHuman: {text_human}\n"
-    message_history += f"AI: {feedback_ai}\n"
+    message_history += f"\nHuman:x {text_human}\n"
+    feedback_ai_single_line = " ".join(feedback_ai.splitlines())
+    message_history += f"AI:x {feedback_ai_single_line}"
 
     # Updating chat_history of roleplay
     chat_history = result["chat"]
     chat_history += f"\nHuman: {text_human}\n"
     chat_history += f"AI: {roleplay_ai}"
 
-
     db.update_one(
         {"_id": obj},
-        {"$set": {"chat": chat_history}},
-        {"$set": {"message_history": message_history}}
+        {
+            "$set": {"chat": chat_history,
+                     "message_history": message_history
+                     }
+        },
+        upsert=True
     )
 
     # Updating assignments collection with the mistakes
@@ -734,7 +746,9 @@ def errors():
        "errors":[grammer_errors,vocabulary_errors,tone_errors]
 
         
-    })  
+    })
+
+
 @app.route('/api/get_feedback_header_statistics_for_student', methods=['POST'])
 def general_feedback_student():
     req = request.get_json()
