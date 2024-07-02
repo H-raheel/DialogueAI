@@ -1,12 +1,62 @@
-import React from "react";
-
+import React, { useEffect, useState } from "react";
 // components
 
 import CardStats from "../Cards/CardStats.js";
 
-export default function HeaderStats({props}) {
+export default function HeaderStats({chatid}) {
 
-   const {assignment,classsection,submitted,duedate,name}=props;
+  const [data, setData] = useState({
+    assignment_name: "",
+    due_date: "",
+    is_submitted: false,
+    total_errors: 0,
+    name:""
+});
+  const [loading, setLoading] = useState(true);
+  
+  const formatDate = (dateStr) => {
+    try {
+      // Parse the input date string
+      const dateObj = new Date(dateStr);
+      
+      // Format the date as required
+      const formattedDate = dateObj.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+      
+      return formattedDate;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date Format';
+    }
+  }
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/get_feedback_header_statistics_for_teacher", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ chat_id: chatid }),
+        });
+       
+        const fetchedData = await response.json();
+        setData(fetchedData);
+        console.log(fetchedData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [chatid]);
 
    
   return (
@@ -20,7 +70,7 @@ export default function HeaderStats({props}) {
             <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
             <CardStats
                   statSubtitle="Student Name"
-                  statTitle={name}
+                  statTitle={loading ? <Loader /> :data.name}
                   statArrow=""
                   statPercent=""
                  // statPercentColor="text-purple-500"
@@ -34,7 +84,7 @@ export default function HeaderStats({props}) {
 
                 <CardStats
                   statSubtitle="Asssignment Name"
-                  statTitle={assignment}
+                  statTitle={loading ? <Loader /> :data.assignment_name}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -45,8 +95,8 @@ export default function HeaderStats({props}) {
               </div>
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle="Class"
-                  statTitle={classsection}
+                  statSubtitle="Total Mistakes"
+                  statTitle={loading ? <Loader /> :data.total_errors}
                   statArrow=""
                   statPercent=""
                   statPercentColor=""
@@ -59,7 +109,7 @@ export default function HeaderStats({props}) {
                
                 <CardStats
                   statSubtitle="Submitted"
-                  statTitle={submitted}
+                  statTitle={loading ? <Loader /> :data.is_submitted?"Yes":"No"}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -71,7 +121,7 @@ export default function HeaderStats({props}) {
               <div className="font-light w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
                   statSubtitle="Due Date"
-                  statTitle={duedate}
+                  statTitle={loading ? <Loader /> :formatDate(data.due_date)}
                   statArrow=""
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -87,3 +137,7 @@ export default function HeaderStats({props}) {
     </>
   );
 }
+
+const Loader = () => (
+  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-500"></div>
+);

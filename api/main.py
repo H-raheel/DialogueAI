@@ -695,14 +695,46 @@ def general_feedback_teacher():
        is_submitted = assignment["is_submitted"]
        assignment_name = assignment["name"]
        user_id = assignment["user_id"]
+       total_errors = assignment["grammar_errors"]+assignment["vocabulary_errors"]+assignment["tone_errors"]
+
 
     result = db.find({ "user_id": user_id })[0]
     return jsonify({
         "due_date": due_date,
         "is_submitted": is_submitted,
         "assignment_name": assignment_name,
-        "name": result['name']
+        "name": result['name'],
+        "total_errors":total_errors
+
+        
     })   
+
+@app.route('/api/assignment_errors', methods=['POST'])
+def errors():
+    req = request.get_json()
+    chat_id = req.get('chat_id')
+
+    if not chat_id:
+        return jsonify({"error": "chat_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    assignment = db_assignments.find_one({"chat_id": chat_id})
+    
+    db = connect().Main.users
+    
+   
+    if assignment:
+       grammer_errors=assignment["grammar_errors"]
+       tone_errors=assignment["tone_errors"]
+       vocabulary_errors=assignment["vocabulary_errors"]
+
+
+    
+    return jsonify({
+       "errors":[grammer_errors,vocabulary_errors,tone_errors]
+
+        
+    })  
 @app.route('/api/get_feedback_header_statistics_for_student', methods=['POST'])
 def general_feedback_student():
     req = request.get_json()

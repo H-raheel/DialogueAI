@@ -3,36 +3,64 @@ import React, { useEffect, useState } from "react";
 
 export default function CardBarChart({ chatid }) {
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState([]);
 console.log(chatid)
-  useEffect(() => {
-    // Function to fetch data based on chatid
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Simulating a data fetch with chatid
-        // Replace this with your actual data fetching logic
-        const data = {
-         //grammer,vocab,tone
-          mistakes: [50, 62, 70]
-        };
-        setChartData(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+let inputData = [
+];
 
-    if (chatid!="") {
-        console.log("hereeii")
-      fetchData();
+
+
+useEffect(() => {
+ 
+
+
+  const fetchData = async () => {
+    // Ensure chatid is defined and valid
+    if (!chatid) {
+      console.error("chat_id is required but not provided.");
+      return;
     }
-  }, []);
+  
+    console.log("Sending request with chat_id:", chatid);
+  
+    try {
+      setLoading(true)
+      const response = await fetch("/api/assignment_errors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ "chat_id": chatid }),
+      });
+  
+      console.log("Request sent. Awaiting response...");
+  
+  
+  
+      const fetchedData = await response.json();
+      console.log("Data received:", fetchedData);
+      inputData=fetchedData.errors;
+      console.log(inputData)
+      console.log(inputData)
+      setChartData(fetchedData.errors);
+    } catch (error) {
+   
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false)
+      console.log("Request finished.");
+    }
+  };
+  
+    fetchData()
+
+}, [chatid]);
 
   useEffect(() => {
-    if (!loading && chartData) {
+    console.log(chartData)
+    if (!loading ) {
+      console.log(inputData)
       let config = {
         type: "bar",
         data: {
@@ -46,7 +74,7 @@ console.log(chatid)
               label: "Mistakes",
               backgroundColor: "rgba(54, 162, 235, 0.7)", // Bright blue
               borderColor: "rgba(54, 162, 235, 1)",
-              data: chartData.mistakes,
+              data:chartData,
               borderWidth: 1,
               barThickness: 20, // Thicker bars
               maxBarThickness: 30, // Maximum thickness for better spacing
@@ -132,7 +160,7 @@ console.log(chatid)
       let ctx = document.getElementById("bar-chart").getContext("2d");
       window.myBar = new Chart(ctx, config);
     }
-  }, [loading, chartData]);
+  }, [chartData ]);
 
   return (
     <>
