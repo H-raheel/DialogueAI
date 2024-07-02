@@ -609,10 +609,11 @@ def get_student_highest_lowest_achievements_for_teachers_dashboard():
     needs_improvement = sorted_students[split_point:]
 
     # Fetch student names from user_id
+    db_users = connect().Main.users
     def get_student_names(students):
         result = []
         for user_id, errors in students:
-            user = db.users.find_one({"user_id": user_id})
+            user = db_users.find_one({"user_id": user_id})
             if user:
                 result.append({"name": user['name'], "errors": errors})
         return result
@@ -675,8 +676,8 @@ def get_header_statistics_for_teacher():
 
     # Get the names of the best and worst performing students
     users = list(users)  # Convert cursor to list for reuse
-    best_student_name = next(user['name'] for user in users if user['user_id'] == best_performing_student)
-    worst_student_name = next(user['name'] for user in users if user['user_id'] == worst_performing_student)
+    best_student_name = next((user['name'] for user in users if user['user_id'] == best_performing_student), "Unknown")
+    worst_student_name = next((user['name'] for user in users if user['user_id'] == worst_performing_student), "Unknown")
 
     number_of_assignments = db.assignments.count_documents({"assigner": teacher_id})
 
