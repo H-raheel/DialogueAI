@@ -10,6 +10,7 @@ export interface Message {
 export interface immediateFeedback {
  // role: typeof userRole | typeof botRole;
   content: string;
+  role:typeof botRole;
 }
 export interface ChatId {
   chatid: string;

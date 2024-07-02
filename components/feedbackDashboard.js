@@ -27,32 +27,37 @@ export default function Dashboard({chatid}) {
     tone: "Your tone is casual and friendly",
     vocabulary: "Appropriate vocabulary for the conversation",
   }; 
+
+
+  function filterAIResponses(data) {
+    return data.filter((item) => item.role === "AI");
+  }
   useEffect(() => {
     // setGeneralFeedback(dummyData);
     //gets the stored chat
     const fetchData = async () => {
+      console.log(chatid);
       setLoading(true);
       try {
-        const response = await fetch('/api/openChat', {
-          method: 'POST',
+        const response = await fetch("/api/openChat", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-          body: JSON.stringify({ "chatid": chatid }),
+          body: JSON.stringify({ chatid: chatid }),
         });
         const fetchedData = await response.json();
-        var messages = fetchedData['chatHistory'];
+        var messages = fetchedData["chatHistory"];
+        var feedbackData=filterAIResponses(fetchedData["feedback_history"]);
+        setFeedback(feedbackData);
         setChatHistory(messages);
-      //  setGeneralFeedback(dummyData);
-        console.log('chatHistory1:', messages)
-       // console.log(generalFeedback)
+        console.log("chatHistory1:", messages);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
-     
     };
     const fetchData2=async()=>{
       try {
@@ -102,7 +107,7 @@ console.log(generalFeedback)
         
        
         <div className=" xl:w-screen" >
-          <ChatMessages chatHistory={chatHistory} feedback={[]}/>
+          <ChatMessages chatHistory={chatHistory} feedback={feedback}/>
           </div>
         {/* <div className=" px-4 xl:w-8/12 flex-grow">
           <CardMistakes />

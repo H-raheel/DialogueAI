@@ -19,7 +19,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   const [sentTranscription, setSentTranscription] = useState("");
  
   const [chatHistory, setChatHistory] = useState<any>([]);
-  const [feedback, setfeedback] = useState<any>([]);
+  const [feedback, setFeedback] = useState<any>([]);
   let botMessage="";
 let fetchedData=({
    
@@ -33,7 +33,9 @@ let fetchedData=({
   const [showProgress, setShowProgress] = useState(false);
   const [progress, setProgress] = useState(0);
   const [disabled, setDisabled] = useState(false);
-
+  function filterAIResponses(data:any) {
+    return data.filter((item:any) => item.role === "AI");
+  }
   useEffect(() => {
     let timer: number; // Explicitly set the type of timer to number
 
@@ -94,6 +96,8 @@ let fetchedData=({
         });
         const fetchedData = await response.json();
         var messages = fetchedData["chatHistory"];
+        var feedbackData=filterAIResponses(fetchedData["feedback_history"]);
+        setFeedback(feedbackData);
         setChatHistory(messages);
         console.log("chatHistory1:", messages);
       } catch (error) {
@@ -232,7 +236,7 @@ let fetchedData=({
         console.log("fetched datain feedback", fetched);
         console.log("fetched datain feedback", fetched["feedback"]);
         console.log("transcription", fulltranscript);
-        feedback.push({ content: fetched.feedback });
+        feedback.push({role: "AI", content: fetched.feedback });
         console.log(feedback);
        fetchedData=(
           {
