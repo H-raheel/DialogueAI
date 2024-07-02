@@ -679,7 +679,8 @@ def get_header_statistics_for_teacher():
     best_student_name = next((user['name'] for user in users if user['user_id'] == best_performing_student), "Unknown")
     worst_student_name = next((user['name'] for user in users if user['user_id'] == worst_performing_student), "Unknown")
 
-    number_of_assignments = db.assignments.count_documents({"assigner": teacher_id})
+    db_assignments = connect().Main.assignments
+    number_of_assignments = db_assignments.count_documents({"assigner": teacher_id})
 
     return jsonify({
         "language": assignments[0]['language'],
