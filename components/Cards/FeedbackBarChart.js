@@ -144,7 +144,7 @@ console.log(chatid)
                 Performance
               </h6>
               <h2 className="text-blueGray-700 text-xl font-semibold">
-                Overall Performance In Assignments
+               Performance In Assignment
               </h2>
             </div>
           </div>

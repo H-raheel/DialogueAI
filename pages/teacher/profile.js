@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useRouter } from 'next/router';
+
 import { useState } from 'react';
 import CardSocialTraffic from "../../components/Cards/CardSocialTraffic.js";
 import CardTeacherExp from "../../components/Cards/CardTeacherExperienc.js";
@@ -9,7 +9,7 @@ import withRoleProtection from "../../hoc/authWrap.jsx";
 
  function Profile() {
   const [imageSrc, setImageSrc] = useState('3');
-  const router = useRouter();
+  
   return (
     <>
       {/* <Navbar transparent /> */}

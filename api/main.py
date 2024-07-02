@@ -96,7 +96,8 @@ def getRole():
     uid = req['uid']
     result = db.find({ "user_id": uid })[0]
     return {
-        'role': result['role']
+        'role': result['role'],
+        'name':result['name']
     }
 
 
@@ -673,6 +674,62 @@ def get_header_statistics_for_teacher():
         "worst_performing_student": worst_student_name,
         "number_of_assignments": number_of_assignments
     })
+
+##general feedback pages
+@app.route('/api/get_feedback_header_statistics_for_teacher', methods=['POST'])
+def general_feedback_teacher():
+    req = request.get_json()
+    chat_id = req.get('chat_id')
+
+    if not chat_id:
+        return jsonify({"error": "chat_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    assignment = db_assignments.find_one({"chat_id": chat_id})
+    
+    db = connect().Main.users
+    
+   
+    if assignment:
+       due_date = assignment["due_date"]
+       is_submitted = assignment["is_submitted"]
+       assignment_name = assignment["name"]
+       user_id = assignment["user_id"]
+
+    result = db.find({ "user_id": user_id })[0]
+    return jsonify({
+        "due_date": due_date,
+        "is_submitted": is_submitted,
+        "assignment_name": assignment_name,
+        "name": result['name']
+    })   
+@app.route('/api/get_feedback_header_statistics_for_student', methods=['POST'])
+def general_feedback_student():
+    req = request.get_json()
+    chat_id = req.get('chat_id')
+
+    if not chat_id:
+        return jsonify({"error": "chat_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    assignment = db_assignments.find_one({"chat_id": chat_id})
+    
+  
+    
+   
+    if assignment:
+       due_date = assignment["due_date"]
+       is_submitted = assignment["is_submitted"]
+       assignment_name = assignment["name"]
+       total_errors = assignment["grammar_errors"]+assignment["vocabulary_errors"]+assignment["tone_errors"]
+
+   
+    return jsonify({
+        "due_date": due_date,
+        "is_submitted": is_submitted,
+        "assignment_name": assignment_name,
+        "total_errors": total_errors
+    })   
 
 
 @app.route('/api/get_bar_statistics_for_teacher', methods=['POST'])

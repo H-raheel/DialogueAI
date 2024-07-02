@@ -123,7 +123,7 @@ role=="student"?
               label: "Grammar Mistakes",
               backgroundColor: "rgba(54, 162, 235, 0.7)", // Bright blue
               borderColor: "rgba(54, 162, 235, 1)",
-              data: data["grammer_errors"],
+              data: data["grammar_errors"],
               borderWidth: 1,
               barThickness: 20, // Thicker bars
               maxBarThickness: 30, // Maximum thickness for better spacing

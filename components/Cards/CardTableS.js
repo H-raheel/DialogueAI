@@ -133,7 +133,7 @@ export default function CardTable({ color }) {
                     {item.dueDate}
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.submitted}
+                      {item.submitted?"Yes":"No"}
                   </td>
 
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
@@ -144,14 +144,19 @@ export default function CardTable({ color }) {
                     </Link>
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-
-                  <Link href={`/chat/${item.chatId}`} >
+                       {item.submitted?( <Link href={`/chat/${item.chatId}`}  >
                     
                     <button className="bg-blue-500 text-white py-1 px-3 rounded">
                       Complete Assignment
                     </button>
                    
-                    </Link>
+                    </Link>)
+                    :(<button className="bg-gray-400 text-black py-1 px-3 rounded">
+                      Complete Assignment
+                    </button>
+                   )
+                  }
+                 
                   </td>
                 </tr>
               ))}
