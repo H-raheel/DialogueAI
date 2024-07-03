@@ -21,6 +21,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
   const [chatHistory, setChatHistory] = useState<any>([]);
   const [feedback, setFeedback] = useState<any>([]);
   let botMessage="";
+  let prompt="";
 let fetchedData=({
    
     feedback: "",
@@ -186,12 +187,32 @@ let fetchedData=({
     setIsRecording(false);
     console.log("recstopped");
     console.log(fulltranscript);
+    
+    const getPrompt = async () => {
+      try {
+        console.log(chatid)
+        console.log("in heree")
+        const response = await fetch("/api/get_prompt_from_chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ "chat_id":chatid }),
+        });
+        const fetchedData = await response.json();
+       prompt=fetchedData.system_prompt;
+console.log(fetchedData);
+       
+     //   console.log("totalTranscript2:", totalTranscript);
+        //   console.log('botMessage:', botMessage)
+      
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+      finally{   setDisabled(false);}
+    };
 
-    // if (recognitionRef.current) {
-    // recognitionRef.current.stop();
-   // setRecordingComplete(true);
-   // let totalTranscript = joinStringsLowercase(fulltranscript[fulltranscript.length-1]);
-   // console.log("total transcript:", totalTranscript);
     const fetchData = async () => {
       try {
         const response = await fetch("/api/getResponse", {
@@ -200,7 +221,9 @@ let fetchedData=({
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({ text: fulltranscript[fulltranscript.length-1] }),
+          body: JSON.stringify({ text: fulltranscript[fulltranscript.length-1],
+                    system_prompt:prompt
+           }),
         });
         const fetchedData = await response.json();
         let message = fetchedData["response"];
@@ -220,6 +243,12 @@ let fetchedData=({
       }
       finally{   setDisabled(false);}
     };
+
+
+   
+
+
+    //get_prompt_from_chat 
     const fetchFeedback = async () => {
       try {
         console.log("sending", fulltranscript[fulltranscript.length-1]);
@@ -283,6 +312,9 @@ let fetchedData=({
         console.error("Error fetching data:", error);
       }
     };
+    
+    await getPrompt();
+    console.log("hee")
     await fetchData();
     await fetchFeedback();
      updateDB();

@@ -215,9 +215,10 @@ def assign():
     # return insert.inserted_id
 
 
-@app.route('/api/get_prompt_from_chat', methods=['GET'])
+@app.route('/api/get_prompt_from_chat', methods=['POST'])
 def get_prompt_from_chat():
-    chat_id = request.args.get('chat_id')
+    req= request.get_json()
+    chat_id=req['chat_id']
 
     if not chat_id:
         return jsonify({"error": "chat_id is required"}), 400
