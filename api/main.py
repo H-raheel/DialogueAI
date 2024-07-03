@@ -241,18 +241,24 @@ def getResponse():
     # Talks to chatgpt and gets a response
     req = request.get_json()
     text = req['text']
+    system_prompt = req['system_prompt']
+    chat_history = req['chat_history']
+    print(f"chat_history = {chat_history}")
 
-    prompt_template = ChatPromptTemplate.from_messages(
-        [
-            ("system", req['system_prompt']),
-            MessagesPlaceholder(variable_name="history")
-        ]
+    chat_history_list = [
+        {"role": "user",
+         "content": message.get('content')} for message in chat_history]
+    chat_history_list.insert(0, {"role": "system", "content": f"{system_prompt}"})
+    chat_history_list.append({'role': 'user', 'content': text})
+
+    print(f"chat_history_list = {chat_history_list}")
+    response_roleplay_ai: ChatCompletion = openai_client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=chat_history_list,
+        max_tokens=150,
+        temperature=0.5,
     )
-    memory = ConversationBufferMemory(memory_key="history", return_messages=True)
-    conversation.memory = memory
-    conversation.prompt = prompt_template
-    result = conversation.run(input=text)
-    return {'response': result}
+    return {'response': response_roleplay_ai.choices[0].message.content}
 
 
 @app.route('/api/getAssignments', methods=['GET', 'POST'])
