@@ -162,7 +162,7 @@ export default function CardTable({ color }) {
                       {item.is_submitted ? "Yes" : "No"}
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                      <Link href={`/feedback/${item.chat_id}`}>
+                      <Link href={`feedback/${item.chat_id}`}>
                         <button className="bg-blue-500 text-white py-1 px-3 rounded">
                           View
                         </button>
