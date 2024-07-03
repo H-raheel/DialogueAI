@@ -8,7 +8,7 @@ export default function Assignment() {
   const [description, setDescription] = useState("");
   const [dialogueRole, setDialogueRole] = useState("");
   const [studentRole, setStudentRole] = useState("");
-  const [setting, setSetting] = useState("");
+  const [aidescription, setaiDescription] = useState("");
   const [language, setLanguage] = useState("");
   const [dueDate, setDueDate] = useState(null);
   const [error, setError] = useState("");
@@ -94,6 +94,7 @@ export default function Assignment() {
       setLanguage("");
       setDueDate(null);
       setError("");
+      setaiDescription("");
       
       // Display success message
       alert('Assignments and prompt created successfully!');
@@ -128,6 +129,18 @@ export default function Assignment() {
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="assignmentDescription" className="block text-white text-sm font-semibold mb-2">Assignment Description for AI</label>
+                <textarea
+                  id="assignmentaiDescription"
+                  className="w-full px-3 py-2 text-white bg-blueGray-800 rounded focus:outline-none focus:ring focus:border-blue-300"
+                  rows="5"
+                  placeholder="Assignment Details (Write how you want the AI to behave eg:'Imagine you are a shoe seller....')"
+                  value={aidescription}
+                  onChange={(e) => setaiDescription(e.target.value)}
+                  required
+                ></textarea>
               </div>
               <div className="mb-4">
                 <label htmlFor="assignmentDescription" className="block text-white text-sm font-semibold mb-2">Assignment Description</label>
@@ -165,18 +178,7 @@ export default function Assignment() {
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label htmlFor="roleplaySetting" className="block text-white text-sm font-semibold mb-2">Roleplay Setting</label>
-                <input
-                  type="text"
-                  id="roleplaySetting"
-                  className="w-full px-3 py-2 text-white bg-blueGray-800 rounded focus:outline-none focus:ring focus:border-blue-300"
-                  placeholder="The roleplay setting e.g. small cafe in a small town"
-                  value={setting}
-                  onChange={(e) => setSetting(e.target.value)}
-                  required
-                />
-              </div>
+              
               <div className="mb-4">
                 <label htmlFor="language" className="block text-white text-sm font-semibold mb-2">Language</label>
                 <input

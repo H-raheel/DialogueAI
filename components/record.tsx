@@ -222,7 +222,8 @@ console.log(fetchedData);
             Accept: "application/json",
           },
           body: JSON.stringify({ text: fulltranscript[fulltranscript.length-1],
-                    system_prompt:prompt
+                    system_prompt:prompt,
+                    chat_history:chatHistory,
            }),
         });
         const fetchedData = await response.json();
