@@ -166,7 +166,7 @@ export default function CardTable({ color }) {
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
                       {item.is_submitted===false ? (
-                        <Link href={`/chat/${item.chat_id}`}>
+                        <Link href={`chat/${item.chat_id}`}>
                           <button className="bg-blue-500 text-white py-1 px-3 rounded">
                             Complete Assignment
                           </button>
