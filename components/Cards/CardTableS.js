@@ -103,7 +103,7 @@ const user=useSelector((state)=>state.user)
                         : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                     }
                   >
-                    View
+                  Feedback
                   </th>
                   <th
                     className={
@@ -127,19 +127,19 @@ const user=useSelector((state)=>state.user)
                       {item.dueDate}
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                      {item.submitted ? "Yes" : "No"}
+                      {item.is_submitted==true? "Yes" : "No"}
                     </td>
 
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                      <Link href={`/feedback/${item.chatId}`}>
+                      <Link href={`/feedback/${item.chat_id}`}>
                         <button className="bg-blue-500 text-white py-1 px-3 rounded">
                           View
                         </button>
                       </Link>
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                      {item.submitted ? (
-                        <Link href={`/chat/${item.chatId}`}>
+                      {item.submitted ==true? (
+                        <Link href={`/chat/${item.chat_id}`}>
                           <button className="bg-blue-500 text-white py-1 px-3 rounded">
                             Complete Assignment
                           </button>

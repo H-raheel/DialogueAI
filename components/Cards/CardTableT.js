@@ -1,7 +1,7 @@
+import Link from "next/link";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
 export default function CardTable({ color }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -131,14 +131,15 @@ const id=useSelector((state)=>state.user)
                     {item.due_date}
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.submitted ? "Yes" : "No"}
+                    {item.is_submitted ==true? "Yes" : "No"}
                   </td>
-                 
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    <button className="bg-blue-500 text-white py-1 px-3 rounded">
-                      View
-                    </button>
-                  </td>
+                      <Link href={`/feedback/${item.chat_id}`}>
+                        <button className="bg-blue-500 text-white py-1 px-3 rounded">
+                          View
+                        </button>
+                      </Link>
+                    </td>
                 </tr>
               ))}
             </tbody>
