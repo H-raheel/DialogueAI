@@ -26,6 +26,9 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationSummaryBufferMemory, ConversationBufferMemory
 import speech_recognition as sr
 
+from langchain_core.messages import HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
 # Import the logger from the main module
 logger = logging.getLogger(__name__)
 
@@ -212,12 +215,42 @@ def assign():
     # return insert.inserted_id
 
 
+@app.route('/api/get_prompt_from_chat', methods=['GET'])
+def get_prompt_from_chat():
+    chat_id = request.args.get('chat_id')
+
+    if not chat_id:
+        return jsonify({"error": "chat_id is required"}), 400
+
+    db_chat = connect().Chat.session
+    try:
+        chat_document = db_chat.find_one({"_id": ObjectId(chat_id)})
+        if not chat_document:
+            return jsonify({"error": "Chat not found"}), 404
+
+        prompt = chat_document.get('prompt')
+        return jsonify({"system_prompt": prompt})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/getResponse', methods=['GET', 'POST'])
 def getResponse():
     # Talks to chatgpt and gets a response
     req = request.get_json()
     text = req['text']
-    result = conversation.predict(input=text)
+
+    prompt_template = ChatPromptTemplate.from_messages(
+        [
+            ("system", req['system_prompt']),
+            MessagesPlaceholder(variable_name="history")
+        ]
+    )
+    memory = ConversationBufferMemory(memory_key="history", return_messages=True)
+    conversation.memory = memory
+    conversation.prompt = prompt_template
+    result = conversation.run(input=text)
     return {'response': result}
 
 
@@ -584,7 +617,7 @@ def update_chat_history_mistakes_for_immediate_feedback():
 
 
 def generate_random_string(length=24):
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    return ''.join(random.choices(string.hexdigits.lower(), k=length))
 
 
 # API 1: Create new assignment documents for each student
@@ -627,10 +660,10 @@ def create_assignments():
     language = data.get('language')
     dialogue_ai_role = data.get('dialogue_ai_role')
     student_role = data.get('student_role')
-    roleplay_setting = data.get('roleplay_setting')
+    roleplay_description_ai = data.get('roleplay_description_ai')
 
     if not all([assignment_name, due_date, teacher_id, student_ids, student_class, student_class, description,
-                dialogue_ai_role, student_role, roleplay_setting]):
+                dialogue_ai_role, student_role, roleplay_description_ai]):
         return jsonify({"error": "Missing required fields"}), 400
 
     due_date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
@@ -656,7 +689,7 @@ def create_assignments():
             "is_submitted": False,
             "dialogue_ai_role": dialogue_ai_role,
             "student_role": student_role,
-            "roleplay_setting": roleplay_setting,
+            "roleplay_description_ai": roleplay_description_ai,
             "assignment_id": assignment_id,
         }
         db_assignments.insert_one(assignment_document)
@@ -746,13 +779,17 @@ def create_llm_prompt():
     language = data.get('language')
     dialogue_ai_role = data.get('dialogue_ai_role')
     student_role = data.get('student_role')
-    roleplay_setting = data.get('roleplay_setting')
+    roleplay_description_ai = data.get('roleplay_description_ai')
 
-    if not all([created_assignments, assignment_description, language, dialogue_ai_role, student_role, roleplay_setting]):
+    if not all([created_assignments, assignment_description, language, dialogue_ai_role, student_role, roleplay_description_ai]):
         return jsonify({"error": "Missing required fields"}), 400
 
     db_chat_session = connect().Chat.session
-    prompt = f"placeholder"
+    system_prompt = f"""
+    This is a roleplay. You are a {dialogue_ai_role}. 
+    Follow the instructions: {roleplay_description_ai}. The conversation MUST be in {language} STRICTLY. 
+    You will be having conversation with a {student_role}. 
+    Feel free to ask interesting and engaging questions. Keep each single conversation concise."""
 
     for assignment in created_assignments:
         student_id = assignment['student_id']
@@ -763,7 +800,7 @@ def create_llm_prompt():
             "_id": ObjectId(chat_id),
             "user_id": student_id,
             "assignment_id": assignment_id,
-            "prompt": prompt,
+            "prompt": system_prompt,
             "chat": [],
             "message_history": [],
             "language": language
@@ -771,7 +808,7 @@ def create_llm_prompt():
 
         db_chat_session.insert_one(chat_document)
 
-    return jsonify({"message": "Chat sessions created successfully", "roleplay_prompt": prompt}), 201
+    return jsonify({"message": "Chat sessions created successfully", "roleplay_prompt": system_prompt}), 201
 
 
 @app.route('/api/get_student_highest_lowest_achievements', methods=['POST'])
