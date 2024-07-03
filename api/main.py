@@ -1,4 +1,7 @@
+import datetime
+import random
 import re
+import string
 from collections import defaultdict
 
 from flask import Flask, request, flash, jsonify
@@ -12,6 +15,7 @@ from __init__ import envs
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 import logging
 import pyaudio
@@ -44,6 +48,8 @@ conversation = ConversationChain(
     verbose=False
     # prompt=prompt_template
 )
+
+
 def connect():
     global db, mongodb_client
     """
@@ -62,7 +68,7 @@ def connect():
     return db
 
 
-def addUser(entry:dict):
+def addUser(entry: dict):
     db = connect().Main.users
     userid = entry['user_id']
     created = entry['created']
@@ -76,6 +82,7 @@ def addUser(entry:dict):
     )
     return insert.inserted_id
 
+
 # @app.route('/', methods=['GET'])
 # def printHello():
 #     return "Hello"
@@ -83,7 +90,7 @@ def addUser(entry:dict):
 def getDetails():
     req = request.get_json()
     id_ = req['id']
-    result = db.find({ "_id": ObjectId(id_) })
+    result = db.find({"_id": ObjectId(id_)})
     result = result[0]
     result['_id'] = str(result['_id'])
     return result
@@ -94,10 +101,10 @@ def getRole():
     db = connect().Main.users
     req = request.get_json()
     uid = req['uid']
-    result = db.find({ "user_id": uid })[0]
+    result = db.find({"user_id": uid})[0]
     return {
         'role': result['role'],
-        'name':result['name']
+        'name': result['name']
     }
 
 
@@ -107,7 +114,7 @@ def getLang():
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
-    result = db.find({ "_id": obj })
+    result = db.find({"_id": obj})
     result = result[0]
     return {
         'lang': result['language']
@@ -115,7 +122,7 @@ def getLang():
 
 
 def getClasses(uid):
-    result = db.find({ "user_id": uid })
+    result = db.find({"user_id": uid})
     resultIds = [i._id for i in result]
     resultNames = [i['name'] for i in result]
     return resultIds, resultNames
@@ -129,13 +136,14 @@ def userGetClasses():
     resultIds, resultNames = getClasses(uid)
     return {'classIds': resultIds, 'classNames': resultNames}
 
+
 @app.route('/api/getChatIds', methods=['GET', 'POST'])
 def getChatIds():
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
-    result = db.find({ "_id": obj })
+    result = db.find({"_id": obj})
     result = result[0]
     return {'result': result}
 
@@ -147,51 +155,62 @@ def openChat():
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
-    result = db.find({ "_id": obj })
+    result = db.find({"_id": obj})
     result = result[0]
     print(f"result = {result}")
     assignmentid = result['assignment_id']
     userid = result['user_id']
 
-    history = updateMemory(assignmentid, userid)
-    history = [{'role': 'Human' if (idx+1) % 2 else 'AI', 'content': i.split(": ")[1]} for idx, i in enumerate(history)]
+    chat_history, feedback_history = update_memory(assignmentid, userid)
+    chat_history = [{'role': 'Human' if (idx + 1) % 2 else 'AI', 'content': i.split(": ")[1]} for idx, i in
+                    enumerate(chat_history)]
+    feedback_history = [{'role': 'Human' if (idx + 1) % 2 else 'AI', 'content': i.split(":x ")[1]} for idx, i in
+                        enumerate(feedback_history)]
+
     # human, AI, human, AI pattern
-    return {'chatHistory': history}
+    return {'chatHistory': chat_history, 'feedback_history': feedback_history}
 
 
-def updateMemory(assignmentid, userid):
-    #updates global conversation memory
+def update_memory(assignmentid, userid):
+    # updates global conversation memory
     global conversation
-    #{"$and":[{"name": "name"}, {"date": "date"}]}
-    db = connect().Chat.session
-    result = db.find({ "$and": [{"assignment_id": assignmentid}, {"user_id": userid}] }).sort('created',pymongo.ASCENDING) #oldest first
-    result = result[0]["chat"]
-    result = result.split("\n")
+    # {"$and":[{"name": "name"}, {"date": "date"}]}
+    db_chat = connect().Chat.session
+    result = db_chat.find({"$and": [{"assignment_id": assignmentid}, {"user_id": userid}]}).sort('created',
+                                                                                                 pymongo.ASCENDING)  # oldest first
+    chat_history = result[0]["chat"]
+    chat_history = chat_history.split("\n")
+
+    feedback_history = result[0]["message_history"]
+    feedback_history = feedback_history.split("\n")
+
     memory = ConversationSummaryBufferMemory(
         llm=chat, max_token_limit=4096
     )
     conversation.memory = memory
-    for i in range(0, len(result), 2):
-        inp = result[i].split(": ")[1]
-        out = result[i+1].split(": ")[1]
+    for i in range(0, len(chat_history), 2):
+        inp = chat_history[i].split(": ")[1]
+        out = chat_history[i + 1].split(": ")[1]
         conversation.memory.save_context({"input": inp}, {"output": out})
 
-    return result
+    return chat_history, feedback_history
+
 
 @app.route('/api/assign', methods=['GET', 'POST'])
 def assign():
     db = connect().Main.assignments
     req = request.get_json()
-    target = req['target'] #either 'everyone' or 'student'
+    target = req['target']  # either 'everyone' or 'student'
     assignment_name = req['assignment_name']
 
-    #insert = db.insert_one(
+    # insert = db.insert_one(
     #    {
     #        'user_id': uid,
     #        'class_id': cid
     #    }
-    #)
-    #return insert.inserted_id
+    # )
+    # return insert.inserted_id
+
 
 @app.route('/api/getResponse', methods=['GET', 'POST'])
 def getResponse():
@@ -207,8 +226,8 @@ def getAssignments():
     db = connect().Main.assignments
     req = request.get_json()
     uid = req['uid']
-    #returns pymongo cursor
-    result = db.find({ "user_id": uid }).sort('created',pymongo.DESCENDING)
+    # returns pymongo cursor
+    result = db.find({"user_id": uid}).sort('created', pymongo.DESCENDING)
     result = [i for i in result]
     format = r'%Y-%m-%d'
     for i in result:
@@ -216,8 +235,8 @@ def getAssignments():
         i['created'] = i['created'].strftime(format)
         i['due_date'] = i['due_date'].strftime(format)
 
-
     return {'result': result}
+
 
 @app.route('/api/getAssignmentDetail', methods=['GET', 'POST'])
 def getAssignmentDetail():
@@ -227,7 +246,7 @@ def getAssignmentDetail():
     chatid = req['chatid']
     obj = ObjectId(chatid)
     format = r'%Y-%m-%d'
-    result = db2.find({ "_id": obj })
+    result = db2.find({"_id": obj})
     result = result[0]
     result2 = db.find({"chat_id": chatid})
     result2 = result2[0]
@@ -238,13 +257,14 @@ def getAssignmentDetail():
     result2['due_date'] = result2['due_date'].strftime(format)
     return {'assignment': result2, 'chat': result}
 
+
 @app.route('/api/updateChat', methods=['GET', 'POST'])
 def updateChat():
     db = connect().Chat.session
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
-    result = db.find({ "_id": obj })
+    result = db.find({"_id": obj})
     result = result[0]
 
 
@@ -264,7 +284,7 @@ def transcribe(filename):
     try:
         with sr.AudioFile(filename) as source:
             audio = recognizer.record(source)
-            text = recognizer.recognize_whisper(audio) # You can try other recognizers as well, besides whisper
+            text = recognizer.recognize_whisper(audio)  # You can try other recognizers as well, besides whisper
             return jsonify({"transcription": text})
     except sr.UnknownValueError:
         return jsonify({"error": "Could not understand audio"}), 400
@@ -305,7 +325,7 @@ def langchain_feedback():
         # Fetch feedback data from db
         db = connect().Chat.feedback
         obj = ObjectId("667bf7c96d8037b647330752")
-        feedback_data = db.find_one({ "_id": obj })
+        feedback_data = db.find_one({"_id": obj})
         print(f"feedback_data = {feedback_data}")
 
         # Initialize LangChain memory
@@ -324,7 +344,8 @@ def langchain_feedback():
 
             # Save the updated message history to the database
             if not feedback_data:
-                db.insert_one({"_id": obj, "student_id": "rfVmiajVyhRQu7F9apY0U2C30o22", "message_history": message_history})
+                db.insert_one(
+                    {"_id": obj, "student_id": "rfVmiajVyhRQu7F9apY0U2C30o22", "message_history": message_history})
             else:
                 db.update_one(
                     {"_id": obj},
@@ -477,6 +498,7 @@ def get_error_summation_teacher():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/api/assignment_submitted', methods=['POST'])
 def update_assignment_is_submitted():
     req = request.get_json()
@@ -497,6 +519,7 @@ def update_assignment_is_submitted():
 
     return jsonify({'message': 'Assignment submission status updated successfully'}), 200
 
+
 @app.route('/api/update_chat_history', methods=['POST'])
 def update_chat_history_mistakes_for_immediate_feedback():
     print(f"inside update_chat_history")
@@ -511,25 +534,28 @@ def update_chat_history_mistakes_for_immediate_feedback():
     chat_id = req['chatid']
     obj = ObjectId(chat_id)
 
-
     result = db.find({"_id": obj})
     result = result[0]
 
     # Updating message_history of feedbacks
     message_history = result["message_history"]
-    message_history += f"\nHuman: {text_human}\n"
-    message_history += f"AI: {feedback_ai}\n"
+    message_history += f"\nHuman:x {text_human}\n"
+    feedback_ai_single_line = " ".join(feedback_ai.splitlines())
+    message_history += f"AI:x {feedback_ai_single_line}"
 
     # Updating chat_history of roleplay
     chat_history = result["chat"]
     chat_history += f"\nHuman: {text_human}\n"
     chat_history += f"AI: {roleplay_ai}"
 
-
     db.update_one(
         {"_id": obj},
-        {"$set": {"chat": chat_history}},
-        {"$set": {"message_history": message_history}}
+        {
+            "$set": {"chat": chat_history,
+                     "message_history": message_history
+                     }
+        },
+        upsert=True
     )
 
     # Updating assignments collection with the mistakes
@@ -548,13 +574,204 @@ def update_chat_history_mistakes_for_immediate_feedback():
 
     if not update_fields:
         return jsonify({'error': 'No valid fields to update'}), 400
-    
+
     db2.update_one(
         {'chat_id': chat_id},
         {'$set': update_fields}
     )
 
     return "success"
+
+
+def generate_random_string(length=24):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+# API 1: Create new assignment documents for each student
+@app.route('/api/create_assignments', methods=['POST'])
+def create_assignments():
+    """
+    Create new assignment documents for each student.
+
+    This API endpoint creates new assignment documents in the assignments collection
+    for each student specified in the input request.
+
+    Request JSON Format:
+    {
+        "assignment_name": str,       # Name of the assignment
+        "due_date": str,              # Due date of the assignment in 'YYYY-MM-DD' format
+        "teacher_id": str,            # ID of the teacher assigning the assignment
+        "student_ids": list,          # List of student IDs receiving the assignment
+        "description": str,           # Description of the assignment
+        "student_class": str,         # Class associated with the assignment
+        "language": str               # Language of the assignment
+    }
+
+    Response JSON Format:
+    {
+        "message": str,               # Message indicating the success of the operation
+        "assignments": list           # List of created assignments with student_id, assignment_id, and chat_id
+    }
+
+    Response Status Codes:
+        201: Assignments created successfully
+        400: Missing required fields
+    """
+    data = request.json
+    assignment_name = data.get('assignment_name')
+    due_date = data.get('due_date')
+    teacher_id = data.get('teacher_id')
+    student_ids = data.get('student_ids')
+    description = data.get('description')
+    student_class = data.get('student_class')
+    language = data.get('language')
+    dialogue_ai_role = data.get('dialogue_ai_role')
+    student_role = data.get('student_role')
+    roleplay_setting = data.get('roleplay_setting')
+
+    if not all([assignment_name, due_date, teacher_id, student_ids, student_class, student_class, description,
+                dialogue_ai_role, student_role, roleplay_setting]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    due_date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
+
+    created_assignments = []
+    db_assignments = connect().Main.assignments
+    for student_id in student_ids:
+        chat_id = generate_random_string()
+        assignment_id = generate_random_string()
+        assignment_document = {
+            "user_id": student_id,
+            "created": datetime.datetime.utcnow(),
+            "name": assignment_name,
+            "due_date": due_date,
+            "class": student_class,
+            "assigner": teacher_id,
+            "description": description,
+            "language": language,
+            "chat_id": chat_id,
+            "grammar_errors": 0,
+            "tone_errors": 0,
+            "vocabulary_errors": 0,
+            "is_submitted": False,
+            "dialogue_ai_role": dialogue_ai_role,
+            "student_role": student_role,
+            "roleplay_setting": roleplay_setting,
+            "assignment_id": assignment_id,
+        }
+        db_assignments.insert_one(assignment_document)
+        created_assignments.append({
+            "student_id": student_id,
+            "assignment_id": assignment_id,
+            "chat_id": chat_id
+        })
+
+    return jsonify({"message": "Assignments created successfully", "assignments": created_assignments}), 201
+
+
+@app.route('/api/get_students_for_teacher', methods=['GET'])
+def get_students_for_teacher():
+    """
+    Get a list of student user IDs for a given teacher.
+
+    This API endpoint retrieves a list of student user IDs that share the same
+    language as the specified teacher.
+
+    Query Parameters:
+        user_id (str): The user ID of the teacher.
+
+    Response JSON Format:
+        {
+            "students": list  # List of student user IDs sharing the same language as the teacher,
+            "language": teacher / student language such as 'en-us' as string
+        }
+
+    Response Status Codes:
+        200: Success with list of student user IDs.
+        400: Missing user ID in the request.
+        404: Teacher not found with the given user ID.
+    """
+    teacher_user_id = request.args.get('user_id')
+
+    if not teacher_user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
+    # Fetch the teacher's document
+    db_users = connect().Main.users
+
+    teacher = db_users.find_one({"user_id": teacher_user_id, "role": "teacher"})
+
+    if not teacher:
+        return jsonify({"error": "Teacher not found"}), 404
+
+    teacher_language = teacher.get('language')
+
+    # Fetch all students with the same language
+    students = db_users.find({"role": "student", "language": teacher_language})
+
+    print(f"students = {students}")
+    student_user_ids = [student['user_id'] for student in students]
+
+    return jsonify({"students": student_user_ids, "language": teacher_language})
+
+
+# API 2: Create LLM prompt
+@app.route('/create_llm_prompt', methods=['POST'])
+def create_llm_prompt():
+    """
+    Creates LLM prompts and updates the chat sessions collection.
+
+    This endpoint accepts assignment details and creates new chat session documents
+    in the `chat.sessions` collection for each assignment.
+
+    Request JSON Parameters:
+        - created_assignments (list of dict): A list of assignment details, where each entry
+          contains the following keys:
+            - student_id (str): The ID of the student.
+            - assignment_id (str): The ID of the assignment.
+            - chat_id (str): The ID of the chat session.
+        - assignment_description (str): A description of the assignment.
+        - language (str): The language of the assignment and chat session.
+        - dialogue_ai_role (str): The role assigned to the AI in the dialogue.
+        - student_role (str): The role assigned to the student in the dialogue.
+
+    Returns:
+        - JSON response indicating success or failure:
+            - On success: A JSON response with a message "Chat sessions created successfully".
+            - On failure: A JSON response with an error message "Missing required fields".
+    """
+    data = request.json
+    created_assignments = data.get('created_assignments')
+    assignment_description = data.get('assignment_description')
+    language = data.get('language')
+    dialogue_ai_role = data.get('dialogue_ai_role')
+    student_role = data.get('student_role')
+    roleplay_setting = data.get('roleplay_setting')
+
+    if not all([created_assignments, assignment_description, language, dialogue_ai_role, student_role, roleplay_setting]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    db_chat_session = connect().Chat.session
+    prompt = f"placeholder"
+
+    for assignment in created_assignments:
+        student_id = assignment['student_id']
+        assignment_id = assignment['assignment_id']
+        chat_id = assignment['chat_id']
+
+        chat_document = {
+            "_id": ObjectId(chat_id),
+            "user_id": student_id,
+            "assignment_id": assignment_id,
+            "prompt": prompt,
+            "chat": [],
+            "message_history": [],
+            "language": language
+        }
+
+        db_chat_session.insert_one(chat_document)
+
+    return jsonify({"message": "Chat sessions created successfully", "roleplay_prompt": prompt}), 201
 
 
 @app.route('/api/get_student_highest_lowest_achievements', methods=['POST'])
@@ -597,10 +814,12 @@ def get_student_highest_lowest_achievements_for_teachers_dashboard():
     needs_improvement = sorted_students[split_point:]
 
     # Fetch student names from user_id
+    db_users = connect().Main.users
+
     def get_student_names(students):
         result = []
         for user_id, errors in students:
-            user = db.users.find_one({"user_id": user_id})
+            user = db_users.find_one({"user_id": user_id})
             if user:
                 result.append({"name": user['name'], "errors": errors})
         return result
@@ -611,6 +830,7 @@ def get_student_highest_lowest_achievements_for_teachers_dashboard():
     }
 
     return jsonify(response)
+
 
 @app.route('/api/get_header_statistics_for_teacher', methods=['POST'])
 def get_header_statistics_for_teacher():
@@ -646,7 +866,9 @@ def get_header_statistics_for_teacher():
 
     user_stats = {}
 
+    language = "en-us"
     for assignment in assignments:
+        language = assignment['language']
         user_id = assignment['user_id']
         errors_sum = assignment['grammar_errors'] + assignment['tone_errors'] + assignment['vocabulary_errors']
 
@@ -661,19 +883,24 @@ def get_header_statistics_for_teacher():
     best_performing_student = min(user_stats, key=user_stats.get)
     worst_performing_student = max(user_stats, key=user_stats.get)
 
+    print(f"user_stats = {user_stats}")
     # Get the names of the best and worst performing students
     users = list(users)  # Convert cursor to list for reuse
-    best_student_name = next(user['name'] for user in users if user['user_id'] == best_performing_student)
-    worst_student_name = next(user['name'] for user in users if user['user_id'] == worst_performing_student)
+    print(f"users = {users}")
+    best_student_name = next((user['name'] for user in users if user['user_id'] == best_performing_student), "Unknown")
+    worst_student_name = next((user['name'] for user in users if user['user_id'] == worst_performing_student),
+                              "Unknown")
 
-    number_of_assignments = db.assignments.count_documents({"assigner": teacher_id})
+    db_assignments = connect().Main.assignments
+    number_of_assignments = db_assignments.count_documents({"assigner": teacher_id})
 
     return jsonify({
-        "language": assignments[0]['language'],
+        "language": language,
         "best_performing_student": best_student_name,
         "worst_performing_student": worst_student_name,
         "number_of_assignments": number_of_assignments
     })
+
 
 ##general feedback pages
 @app.route('/api/get_feedback_header_statistics_for_teacher', methods=['POST'])
@@ -686,28 +913,26 @@ def general_feedback_teacher():
 
     db_assignments = connect().Main.assignments
     assignment = db_assignments.find_one({"chat_id": chat_id})
-    
+
     db = connect().Main.users
-    
-   
+
     if assignment:
-       due_date = assignment["due_date"]
-       is_submitted = assignment["is_submitted"]
-       assignment_name = assignment["name"]
-       user_id = assignment["user_id"]
-       total_errors = assignment["grammar_errors"]+assignment["vocabulary_errors"]+assignment["tone_errors"]
+        due_date = assignment["due_date"]
+        is_submitted = assignment["is_submitted"]
+        assignment_name = assignment["name"]
+        user_id = assignment["user_id"]
+        total_errors = assignment["grammar_errors"] + assignment["vocabulary_errors"] + assignment["tone_errors"]
 
-
-    result = db.find({ "user_id": user_id })[0]
+    result = db.find({"user_id": user_id})[0]
     return jsonify({
         "due_date": due_date,
         "is_submitted": is_submitted,
         "assignment_name": assignment_name,
         "name": result['name'],
-        "total_errors":total_errors
+        "total_errors": total_errors
 
-        
-    })   
+    })
+
 
 @app.route('/api/assignment_errors', methods=['POST'])
 def errors():
@@ -719,22 +944,20 @@ def errors():
 
     db_assignments = connect().Main.assignments
     assignment = db_assignments.find_one({"chat_id": chat_id})
-    
+
     db = connect().Main.users
-    
-   
+
     if assignment:
-       grammer_errors=assignment["grammar_errors"]
-       tone_errors=assignment["tone_errors"]
-       vocabulary_errors=assignment["vocabulary_errors"]
+        grammer_errors = assignment["grammar_errors"]
+        tone_errors = assignment["tone_errors"]
+        vocabulary_errors = assignment["vocabulary_errors"]
 
-
-    
     return jsonify({
-       "errors":[grammer_errors,vocabulary_errors,tone_errors]
+        "errors": [grammer_errors, vocabulary_errors, tone_errors]
 
-        
-    })  
+    })
+
+
 @app.route('/api/get_feedback_header_statistics_for_student', methods=['POST'])
 def general_feedback_student():
     req = request.get_json()
@@ -745,92 +968,20 @@ def general_feedback_student():
 
     db_assignments = connect().Main.assignments
     assignment = db_assignments.find_one({"chat_id": chat_id})
-    
-  
-    
-   
-    if assignment:
-       due_date = assignment["due_date"]
-       is_submitted = assignment["is_submitted"]
-       assignment_name = assignment["name"]
-       total_errors = assignment["grammar_errors"]+assignment["vocabulary_errors"]+assignment["tone_errors"]
 
-   
+    if assignment:
+        due_date = assignment["due_date"]
+        is_submitted = assignment["is_submitted"]
+        assignment_name = assignment["name"]
+        total_errors = assignment["grammar_errors"] + assignment["vocabulary_errors"] + assignment["tone_errors"]
+
     return jsonify({
         "due_date": due_date,
         "is_submitted": is_submitted,
         "assignment_name": assignment_name,
         "total_errors": total_errors
-    })   
-
-
-
-##get assignments
-@app.route('/api/get_assignments_student', methods=['POST'])
-def assignments_student():
-    req = request.get_json()
-    user_id = req.get('user_id')
-
-    if not user_id:
-        return jsonify({"error": "chat_id is required"}), 400
-
-    db_assignments = connect().Main.assignments
-   
-    assignments = db_assignments.find(
-        {"user_id": user_id},
-        {"_id": 0, "name": 1,"due_date":1,"is_submitted":1,"chat_id":1}
-    )
-
-    # Convert cursor to a list and return as JSON
-    assignment_list = list(assignments)
-
-    return jsonify({
-        "assignments": assignment_list
     })
 
-
-@app.route('/api/get_assignments_teacher', methods=['POST'])
-def assignments_teacher():
-    req = request.get_json()
-    assigner_id = req.get('assigner_id')
-
-    if not assigner_id:
-        return jsonify({"error": "assigner_id is required"}), 400
-
-    db_assignments = connect().Main.assignments
-    db_users = connect().Main.users
-
-  
-    assignments = db_assignments.find(
-        {"assigner": assigner_id},
-        {"_id": 0, "due_date": 1, "is_submitted": 1, "chat_id": 1, "user_id": 1,"name":1}
-    )
-
- 
-    assignment_list = list(assignments)
-
-
-    user_ids = set(assignment['user_id'] for assignment in assignment_list)
-
-
-    user_data = db_users.find(
-        {"user_id": {"$in": list(user_ids)}},
-        {"_id": 0, "user_id": 1, "name": 1}
-    )
-
-    
-    user_dict = {user['user_id']: user['name'] for user in user_data}
-
-
-    for assignment in assignment_list:
-        assignment['user_name'] = user_dict.get(assignment['user_id'], "Unknown")
-        del assignment['user_id']
-
-    return jsonify({
-        "assignments": assignment_list
-    })
-
-      
 
 @app.route('/api/get_bar_statistics_for_teacher', methods=['POST'])
 def get_bar_statistics_for_teacher():
@@ -996,10 +1147,14 @@ def record_voice():
     return transcription
     # transcription = transcribe(output_filename)
     # return jsonify({"transcription": transcription})
+
+
 """
 Saves the recorded audio from record_voice.py to api/recordings/ directory.
 TODO: Use this api to record voice, instead of record_voice.py
 """
+
+
 @app.route('/record', methods=['POST'])
 def record():
     print("Inside record api call")
@@ -1021,7 +1176,7 @@ def getAssignmentFeedback():
     req = request.get_json()
     chatid = req['chatid']
     obj = ObjectId(chatid)
-    find = db.find({ "_id": obj })
+    find = db.find({"_id": obj})
     find = find[0]
     chat = find["chat"]
     prompt = """
@@ -1049,5 +1204,4 @@ def getAssignmentFeedback():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
-
+    app.run(debug=True, port=8888, host='0.0.0.0')
