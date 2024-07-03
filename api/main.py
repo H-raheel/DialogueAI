@@ -716,7 +716,7 @@ def get_students_for_teacher():
 
 
 # API 2: Create LLM prompt
-@app.route('/create_llm_prompt', methods=['POST'])
+@app.route('/api/create_llm_prompt', methods=['POST'])
 def create_llm_prompt():
     """
     Creates LLM prompts and updates the chat sessions collection.
@@ -899,6 +899,70 @@ def get_header_statistics_for_teacher():
         "best_performing_student": best_student_name,
         "worst_performing_student": worst_student_name,
         "number_of_assignments": number_of_assignments
+    })
+##get assignments
+@app.route('/api/get_assignments_student', methods=['POST'])
+def assignments_student():
+    req = request.get_json()
+    user_id = req.get('user_id')
+
+    if not user_id:
+        return jsonify({"error": "chat_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+   
+    assignments = db_assignments.find(
+        {"user_id": user_id},
+        {"_id": 0, "name": 1,"due_date":1,"is_submitted":1,"description":1,"chat_id":1}
+    )
+
+    # Convert cursor to a list and return as JSON
+    assignment_list = list(assignments)
+
+    return jsonify({
+        "assignments": assignment_list
+    })
+
+
+@app.route('/api/get_assignments_teacher', methods=['POST'])
+def assignments_teacher():
+    req = request.get_json()
+    assigner_id = req.get('assigner_id')
+
+    if not assigner_id:
+        return jsonify({"error": "assigner_id is required"}), 400
+
+    db_assignments = connect().Main.assignments
+    db_users = connect().Main.users
+
+  
+    assignments = db_assignments.find(
+        {"assigner": assigner_id},
+        {"_id": 0, "due_date": 1, "is_submitted": 1, "chat_id": 1, "user_id": 1,"name":1}
+    )
+
+ 
+    assignment_list = list(assignments)
+
+
+    user_ids = set(assignment['user_id'] for assignment in assignment_list)
+
+
+    user_data = db_users.find(
+        {"user_id": {"$in": list(user_ids)}},
+        {"_id": 0, "user_id": 1, "name": 1}
+    )
+
+    
+    user_dict = {user['user_id']: user['name'] for user in user_data}
+
+
+    for assignment in assignment_list:
+        assignment['user_name'] = user_dict.get(assignment['user_id'], "Unknown")
+        del assignment['user_id']
+
+    return jsonify({
+        "assignments": assignment_list
     })
 
 

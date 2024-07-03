@@ -7,16 +7,21 @@ import withRoleProtection from "../../hoc/authWrap.jsx";
 function AssignPage() {
 
     return (
-      <>
+      <div className="bg-black">
         {/* <AuthContextProvider> */}
         <Sidebar />
         <div className="relative md:ml-64 bg-blueGray-100">
           <Assignment />
         </div>
         {/* </AuthContextProvider> */}
-      </>
+      </div>
     );
   }
 
 
-  export default withRoleProtection(AssignPage,["teacher"])
+  export default withRoleProtection(AssignPage,["teacher"]);
+
+
+
+
+  
