@@ -803,7 +803,7 @@ def assignments_teacher():
   
     assignments = db_assignments.find(
         {"assigner": assigner_id},
-        {"_id": 0, "due_date": 1, "is_submitted": 1, "chat_id": 1, "user_id": 1}
+        {"_id": 0, "due_date": 1, "is_submitted": 1, "chat_id": 1, "user_id": 1,"name":1}
     )
 
  
@@ -823,7 +823,7 @@ def assignments_teacher():
 
 
     for assignment in assignment_list:
-        assignment['name'] = user_dict.get(assignment['user_id'], "Unknown")
+        assignment['user_name'] = user_dict.get(assignment['user_id'], "Unknown")
         del assignment['user_id']
 
     return jsonify({

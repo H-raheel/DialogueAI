@@ -1,64 +1,42 @@
 import PropTypes from "prop-types";
-import React from "react";
-// Dummy data
-const dummyData = {
-   assignments : [
-    {
-        chatId: 1,
-        studentName: "John Doe",
-        class: "3A",
-        assignmentNumber: "Assignment 1",
-        dueDate: "10 August",
-        submitted: "Yes"
-    },
-    {
-      chatId: 2,
-        studentName: "Jane Smith",
-        class: "2B",
-        assignmentNumber: "Assignment 2",
-        dueDate: "15 August",
-      
-        submitted: "No"
-    },
-    {
-      chatId: 3,
-        studentName: "Alice Johnson",
-        class: "1C",
-        assignmentNumber: "Assignment 3",
-        dueDate: "5 August",
-       
-        submitted: "Yes"
-    },
-    {
-      chatId: 4,
-        studentName: "Bob Brown",
-        class: "4A",
-        assignmentNumber: "Assignment 4",
-        dueDate: "1 August",
-       
-        submitted: "Yes"
-    },
-    {
-      chatId: 5,
-        studentName: "Charlie Davis",
-        class: "3B",
-        assignmentNumber: "Assignment 5",
-        dueDate: "20 August",
-   
-        submitted: "No"
-    },
-]
-
-
-};
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function CardTable({ color }) {
-  const data=dummyData.assignments;
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+const id=useSelector((state)=>state.user)
+  useEffect(() => {
+    // Replace 'your-api-endpoint' with your actual API endpoint
+    fetch('/api/get_assignments_teacher', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ assigner_id: id }), // Replace 'teacher_id' with actual ID
+    })
+    .then(response => response.json())
+    .then(data => {
+      setData(data.assignments || []);
+      setLoading(false);
+    })
+    .catch(error => {
+      setError(error);
+      setLoading(false);
+    });
+  }, []); // Empty array means this effect runs once on mount
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading data: {error.message}</div>;
+  }
 
   return (
     <>
-   
       <div
         className={
           "relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded " +
@@ -94,16 +72,7 @@ export default function CardTable({ color }) {
                 >
                   Student Name
                 </th>
-                <th
-                  className={
-                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
-                    (color === "light"
-                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
-                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
-                  }
-                >
-                  Class
-                </th>
+               
                 <th
                   className={
                     "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
@@ -150,20 +119,19 @@ export default function CardTable({ color }) {
             <tbody>
               {data.map((item, index) => (
                 <tr key={index}>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.studentName}
+                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                    {item.name}
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.class}
+                    {item.user_name}
+                  </td>
+                 
+                 
+                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                    {item.due_date}
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.assignmentNumber}
-                  </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.dueDate}
-                  </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.submitted?"Yes":"No"}
+                    {item.submitted ? "Yes" : "No"}
                   </td>
                  
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
