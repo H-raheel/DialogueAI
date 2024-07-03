@@ -8,14 +8,14 @@ import Sidebar from "../../components/Sidebar/SidebarTeacher.js";
 import Dashboard from "../../components/feedbackDashboard.js";
 import withRoleProtection from "../../hoc/authWrap.jsx";
 
-const props={
-    student:"stdname",
-  assignment:"Assignment 1",
-  classsection:"2A",
-  submitted:"Yes"
-  ,duedate:"12 August"
+// const props={
+//     student:"stdname",
+//   assignment:"Assignment 1",
+//   classsection:"2A",
+//   submitted:"Yes"
+//   ,duedate:"12 August"
 
-}
+// }
 function feedbackDashboard() {
   return (
     <>

@@ -2,38 +2,55 @@ import Link from "next/link";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+
 export default function CardTable({ color }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const id=useSelector((state)=>state.user)
+  const id = useSelector((state) => state.user);
+
+  const formatDate = (dateStr) => {
+    try {
+      const dateObj = new Date(dateStr);
+      const formattedDate = dateObj.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+      return formattedDate;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date Format';
+    }
+  };
+
   useEffect(() => {
-    // Replace 'your-api-endpoint' with your actual API endpoint
-    fetch('/api/get_assignments_teacher', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ assigner_id: id }), // Replace 'teacher_id' with actual ID
-    })
-    .then(response => response.json())
-    .then(data => {
-      setData(data.assignments || []);
-      setLoading(false);
-    })
-    .catch(error => {
-      setError(error);
-      setLoading(false);
-    });
-  }, []); // Empty array means this effect runs once on mount
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/get_assignments_teacher', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ assigner_id: id }),  // Replace 'teacher_id' with actual ID
+        });
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-  if (error) {
-    return <div>Error loading data: {error.message}</div>;
-  }
+        const data = await response.json();
+        setData(data.assignments || []);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   return (
     <>
@@ -58,7 +75,6 @@ const id=useSelector((state)=>state.user)
           </div>
         </div>
         <div className="block w-full overflow-x-auto">
-          {/* Table */}
           <table className="items-center w-full bg-transparent border-collapse">
             <thead>
               <tr>
@@ -72,7 +88,6 @@ const id=useSelector((state)=>state.user)
                 >
                   Student Name
                 </th>
-               
                 <th
                   className={
                     "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
@@ -91,7 +106,7 @@ const id=useSelector((state)=>state.user)
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                 Due Date
+                  Due Date
                 </th>
                 <th
                   className={
@@ -101,9 +116,8 @@ const id=useSelector((state)=>state.user)
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                Submitted
+                  Submitted
                 </th>
-             
                 <th
                   className={
                     "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
@@ -117,31 +131,46 @@ const id=useSelector((state)=>state.user)
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
-                <tr key={index}>
-                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.name}
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-4">
+                    <div className="flex justify-center items-center">
+                      <span>Loading...</span>
+                      {/* Optionally, add a spinner icon here */}
+                    </div>
                   </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.user_name}
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-4">
+                    Error loading data: {error.message}
                   </td>
-                 
-                 
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.due_date}
-                  </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {item.is_submitted ==true? "Yes" : "No"}
-                  </td>
-                  <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                </tr>
+              ) : (
+                data.map((item, index) => (
+                  <tr key={index}>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                      {item.name}
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                      {item.user_name}
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                      {formatDate(item.due_date)}
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                      {item.is_submitted ? "Yes" : "No"}
+                    </td>
+                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                       <Link href={`/feedback/${item.chat_id}`}>
                         <button className="bg-blue-500 text-white py-1 px-3 rounded">
                           View
                         </button>
                       </Link>
                     </td>
-                </tr>
-              ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

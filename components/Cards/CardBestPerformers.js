@@ -17,7 +17,7 @@ export default function CardStudentsPerformance() {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({ user_id: user }),  // Ensure user.id is the correct user identifier
+          body: JSON.stringify({ user_id: user }),  // Use correct user identifier
         });
 
         if (!response.ok) {
@@ -26,7 +26,7 @@ export default function CardStudentsPerformance() {
 
         const data = await response.json();
         console.log(data);
-        
+
         setHighAchievers(data.highest_achievers || []);
         setNeedsImprovement(data.needs_improvement || []);
       } catch (error) {
@@ -37,7 +37,7 @@ export default function CardStudentsPerformance() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user]);  // Ensure user.id is used for fetching data
 
   const maxLength = Math.max(highAchievers.length, needsImprovement.length);
 
@@ -72,10 +72,10 @@ export default function CardStudentsPerformance() {
                 </td>
               </tr>
             ) : (
-              [...Array(maxLength)].map((_, index) => (
+              Array.from({ length: maxLength }).map((_, index) => (
                 <tr key={index}>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                    {highAchievers[index] || "N/A"}
+                    {highAchievers[index]?.name || "N/A"}
                   </td>
                   <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                     {needsImprovement[index]?.name || "N/A"}

@@ -1,8 +1,8 @@
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useSelector } from "react-redux";
-
 export default function Assignment() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -13,7 +13,7 @@ export default function Assignment() {
   const [dueDate, setDueDate] = useState(null);
   const [error, setError] = useState("");
   const userId = useSelector((state) => state.user);
-
+const router=useRouter()
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -37,7 +37,7 @@ export default function Assignment() {
         language,
         dialogue_ai_role: dialogueRole,
         student_role: studentRole,
-        roleplay_setting: setting,
+        roleplay_description_ai: aidescription,
         teacher_id: userId,
       };
 
@@ -51,7 +51,7 @@ export default function Assignment() {
         language,
         dialogue_ai_role: dialogueRole,
         student_role: studentRole,
-        roleplay_setting: setting,
+        roleplay_description_ai:  aidescription,
       };
 
       // Call API to create assignments
@@ -84,21 +84,23 @@ export default function Assignment() {
         const errorData = await createPromptResponse.json();
         throw new Error(errorData.error || 'Failed to create prompt');
       }
-
+console.log(aidescription)
       // Reset form fields on success
       setTitle("");
       setDescription("");
       setDialogueRole("");
       setStudentRole("");
-      setSetting("");
+      setaiDescription("");
+      
       setLanguage("");
       setDueDate(null);
       setError("");
-      setaiDescription("");
+      
       
       // Display success message
-      alert('Assignments and prompt created successfully!');
+     
       console.log(promptData);
+      router.push('/teacher/dashboard')
     } catch (error) {
       console.error('Error creating assignments:', error);
       setError('Error creating assignments');
@@ -206,9 +208,9 @@ export default function Assignment() {
                 />
               </div>
               <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:border-blue-300">
-                Submit
+                Create
               </button>
-              {error && <p className="text-red-500 mt-2">{error}</p>}
+              
             </div>
           </form>
         </div>

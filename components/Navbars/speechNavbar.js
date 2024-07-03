@@ -1,11 +1,13 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { UserAuth } from "../../context/AuthContext.js";
+import { useRouter } from "next/router";
 export default function SpeechNavbar({chatid}) {
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const [loading, setLoading] = useState(true);
   const [assignments, setAssignments] = useState([]);
   var data;
+  const router=useRouter()
   // useEffect(() => {
   //   const fetchData = async () => {
   //     if (!user) {
@@ -63,6 +65,7 @@ export default function SpeechNavbar({chatid}) {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
+      router.push('/student/assignments')
       setLoading(false);
     }
   };

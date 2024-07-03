@@ -7,13 +7,13 @@ import HeaderStats from "../../../components/Headers/FeedbackHeaderStats.js";
 import Sidebar from "../../../components/Sidebar/SidebarStudent.js";
 import Dashboard from "../../../components/feedbackDashboard.js";
 import withRoleProtection from "../../../hoc/authWrap.jsx";
-const props={
-  assignment:"Assignment 1",
-  classsection:"2A",
-  submitted:"Yes"
-  ,duedate:"12 August"
+// const props={
+//   assignment:"Assignment 1",
+//   classsection:"2A",
+//   submitted:"Yes"
+//   ,duedate:"12 August"
 
-}
+// }
  function feedbackDashboard() {
 
     const router = useRouter();

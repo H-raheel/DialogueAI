@@ -32,6 +32,20 @@ export default function CardTable({ color }) {
 
     fetchData();
   }, []);
+  const formatDate = (dateStr) => {
+    try {
+      const dateObj = new Date(dateStr);
+      const formattedDate = dateObj.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+      return formattedDate;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date Format';
+    }
+  };
 
   return (
     <div
@@ -138,7 +152,7 @@ export default function CardTable({ color }) {
                       {item.description}
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
-                      {item.dueDate}
+                      {formatDate(item.dueDate)}
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
                       {item.is_submitted ? "Yes" : "No"}

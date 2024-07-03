@@ -930,7 +930,7 @@ def get_header_statistics_for_teacher():
     print(f"user_stats = {user_stats}")
     # Get the names of the best and worst performing students
     users = list(users)  # Convert cursor to list for reuse
-    print(f"users = {users}")
+    
     best_student_name = next((user['name'] for user in users if user['user_id'] == best_performing_student), "Unknown")
     worst_student_name = next((user['name'] for user in users if user['user_id'] == worst_performing_student),
                               "Unknown")
