@@ -1,10 +1,9 @@
 import React from "react";
 
 // components
-import { UserAuth } from "../../context/AuthContext.js"
+import { useEffect, useState } from "react";
+import { UserAuth } from "../../context/AuthContext.js";
 import CardStats from "../Cards/CardPlain.js";
-import { useState, Fragment } from "react";
-import { useEffect } from 'react';
 
 export default function HeaderStats({chatid}) {
   const { user, googleSignIn, logOut } = UserAuth() || {};
@@ -50,7 +49,7 @@ export default function HeaderStats({chatid}) {
             <div className="flex flex-wrap">
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
-                  statSubtitle="Assignment Name"
+                  statSubtitle="Assignment"
                   statTitle={assignment.name}
                 />
               </div>

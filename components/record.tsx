@@ -12,10 +12,10 @@ declare global {
 
 export default function MicrophoneComponent({ chatid }: ChatId) {
   const [isRecording, setIsRecording] = useState(false);
-  //const [recordingComplete, setRecordingComplete] = useState(false);
+  
   const [fulltranscript, setTranscript] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
- // const [language, setLanguage] = useState("");
+ 
   const [sentTranscription, setSentTranscription] = useState("");
  
   const [chatHistory, setChatHistory] = useState<any>([]);
@@ -51,37 +51,15 @@ let fetchedData=({
           }
           return prevProgress + 1; // increment by 1% every 40ms for 4 seconds
         });
-      }, 40); // 40ms interval
+      }, 60); // 60ms interval
     }
 
     // Clear interval on component unmount or if recording stops
     return () => window.clearInterval(timer);
   }, [isRecording]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch('/api/getLang', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Accept: 'application/json',
-  //         },
-  //         body: JSON.stringify({ chatid }),
-  //       });
-  //       const fetchedData = await response.json();
-  //       var lang = fetchedData['lang'];
-  //       setLanguage(lang);
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData(); // Call fetchData when the component mounts
-  // }, [chatid]);
+  
+ 
   useEffect(() => {
     const fetchData = async () => {
       console.log(chatid);
@@ -124,7 +102,7 @@ let fetchedData=({
           },
           body: JSON.stringify({
             output_filename: "test.wav",
-            record_seconds: 4,
+            record_seconds: 6,
           }),
         });
         const data = await response.json();

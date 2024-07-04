@@ -243,7 +243,7 @@ def getResponse():
     text = req['text']
     system_prompt = req['system_prompt']
     chat_history = req['chat_history']
-    print(f"chat_history = {chat_history}")
+   
 
     chat_history_list = [
         {"role": "user",
@@ -1121,7 +1121,7 @@ def get_bar_statistics_for_teacher():
         lambda: {"total_grammar_errors": 0, "total_tone_errors": 0, "total_vocabulary_errors": 0})
 
     for assignment in assignments:
-        assignment_id = assignment.get('assignment_id')
+        assignment_id = assignment.get('name')
         error_summary[assignment_id]["total_grammar_errors"] += assignment.get('grammar_errors', 0)
         error_summary[assignment_id]["total_tone_errors"] += assignment.get('tone_errors', 0)
         error_summary[assignment_id]["total_vocabulary_errors"] += assignment.get('vocabulary_errors', 0)

@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { UserAuth } from "../../context/AuthContext.js";
-import { useRouter } from "next/router";
 export default function SpeechNavbar({chatid}) {
   const { user, googleSignIn, logOut } = UserAuth() || {};
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ export default function SpeechNavbar({chatid}) {
           <p
             className="text-white text-sm uppercase hidden lg:inline-block font-semibold"
           >
-           Assignment Name here
+           
           </p>
           {/* Form */}
           <form className="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3">

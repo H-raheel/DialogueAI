@@ -83,7 +83,7 @@ export default function HeaderStats({chatid}) {
             <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
 
               <CardStats
-                statSubtitle="Asssignment Name"
+                statSubtitle="Title"
                 statTitle={loading ? <Loader /> :data.assignment_name}
                 statArrow=""
                 statPercent=""

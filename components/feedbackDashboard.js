@@ -1,43 +1,23 @@
 import React, { useEffect, useState } from "react";
-
-// components
-
 import { useSelector } from "react-redux";
 import CardGeneralFeedback from "./Cards/Cardfeedback1.js";
 import CardBarChart from "./Cards/FeedbackBarChart.js";
-import ChatMessages from "./chatMessages";
-export default function Dashboard({chatid}) {
- 
-  const role=useSelector((state) => state.role);
-  //set chathistory
-  const [chatHistory,setChatHistory]=useState([])
-  //set immfeedback
+import ChatMessages from "./chatMessageFeedback.js";
 
+export default function Dashboard({ chatid }) {
+  const role = useSelector((state) => state.role);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [feedback, setFeedback] = useState([]);
+  const [generalFeedback, setGeneralFeedback] = useState({});
 
-  const [feedback,setFeedback]=useState([])
-
-  //general feedback
-
-  const [generalFeedback,setGeneralFeedback]=useState({})
-  const [loading,setLoading]=useState(false);
-
-
-  const dummyData = {
-    grammatical: "Messages are grammatically correct",
-    tone: "Your tone is casual and friendly",
-    vocabulary: "Appropriate vocabulary for the conversation",
-  }; 
-
-
+  // Function to filter AI responses
   function filterAIResponses(data) {
     return data.filter((item) => item.role === "AI");
   }
+
   useEffect(() => {
-    // setGeneralFeedback(dummyData);
-    //gets the stored chat
+    // Fetch chat data
     const fetchData = async () => {
-      console.log(chatid);
-      setLoading(true);
       try {
         const response = await fetch("/api/openChat", {
           method: "POST",
@@ -48,71 +28,54 @@ export default function Dashboard({chatid}) {
           body: JSON.stringify({ chatid: chatid }),
         });
         const fetchedData = await response.json();
-        var messages = fetchedData["chatHistory"];
-        var feedbackData=filterAIResponses(fetchedData["feedback_history"]);
+        const messages = fetchedData["chatHistory"];
+        const feedbackData = filterAIResponses(fetchedData["feedback_history"]);
         setFeedback(feedbackData);
         setChatHistory(messages);
-        console.log("chatHistory1:", messages);
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
       }
     };
-    const fetchData2=async()=>{
+
+    // Fetch general feedback
+    const fetchGeneralFeedback = async () => {
       try {
-        console.log("inside")
-        const response = await fetch('/api/getAssignmentFeedback', {
-          method: 'POST',
+        const response = await fetch("/api/getAssignmentFeedback", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-          body: JSON.stringify({ "chatid": chatid }),
+          body: JSON.stringify({ chatid: chatid }),
         });
         const fetchedData = await response.json();
-        var feedback = fetchedData['feedback'];
-       // setChatHistory(messages);
+        const feedback = fetchedData["feedback"];
         setGeneralFeedback(feedback);
-       // console.log('chatHistory1:', messages)
-        console.log(generalFeedback)
       } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching data:", error);
       }
-    }
-    //api/getAssignmentFeedback
-  fetchData2()
-  fetchData();
-     // Call fetchData when the component mounts
+    };
+
+    fetchGeneralFeedback();
+    fetchData();
   }, [chatid]);
-console.log(generalFeedback)
 
-    return (
-      <>
-   <div className="flex flex-row ">
-  <div className="xl:w-8/12 mx-7 mb-12">
-    <CardBarChart chatid={chatid} />
-  </div>
-  <div className="xl:w-4/12 h-64 px-4 flex flex-col">
-    <div className="flex-grow">
-      <CardGeneralFeedback data ={generalFeedback}/>
-    </div>
-  </div>
-</div>
-
-      <div className="flex mt-4 ">
-       
-        
-       
-        <div className=" xl:w-screen" >
-          <ChatMessages chatHistory={chatHistory} feedback={feedback}/>
-          </div>
-        {/* <div className=" px-4 xl:w-8/12 flex-grow">
-          <CardMistakes />
-        </div> */}
+  return (
+    <div className="flex flex-col w-full space-y-4">
+      {/* Bar Chart and General Feedback */}
+      <div className="flex flex-col md:flex-row w-full space-y-4 md:space-y-0 md:space-x-4">
+        <div className="flex-grow md:w-8/12">
+          <CardBarChart chatid={chatid} />
+        </div>
+        <div className=" md:w-4/12">
+          <CardGeneralFeedback data={generalFeedback} />
+        </div>
       </div>
-    </>
-    );
-  }
+
+      {/* Chat Messages */}
+      <div className="w-full">
+        <ChatMessages chatHistory={chatHistory} feedback={feedback} />
+      </div>
+    </div>
+  );
+}

@@ -88,7 +88,7 @@ export default function ChatMessages({ chatHistory, feedback }: ChatMessagesProp
       <div className="col-span-6 px-6 pr-2 pb-52 pl-10 overflow-y-auto bg-white" ref={chatContainerRef}>
         {chatHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-screen w-full">
-            <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">{loading ? 'Loading..' : 'Start Recording'}</h2>
+            <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">{loading ? 'Loading..' : 'Assignment Not Started Yet!'}</h2>
           </div>
         ) : (
           chatHistory.map((message, index) => (
@@ -143,7 +143,7 @@ export default function ChatMessages({ chatHistory, feedback }: ChatMessagesProp
           })
         ) : (
           <div className="flex flex-col items-center justify-center h-screen w-full">
-            <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">{loading ? 'Loading..' : 'Start Recording'}</h2>
+            <h2 className="text-xl text-center mt-12 animate-none lg:animate-bounce">{loading ? 'Loading..' : 'No Feedback!'}</h2>
           </div>
         )}
       </div>

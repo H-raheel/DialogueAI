@@ -96,7 +96,7 @@ export default function CardTable({ color }) {
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                  Assignment Number
+                  Assignment
                 </th>
                 <th
                   className={

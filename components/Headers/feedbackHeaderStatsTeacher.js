@@ -83,7 +83,7 @@ export default function HeaderStats({chatid}) {
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
 
                 <CardStats
-                  statSubtitle="Asssignment Name"
+                  statSubtitle="Title"
                   statTitle={loading ? <Loader /> :data.assignment_name}
                   statArrow=""
                   statPercent=""
@@ -93,7 +93,7 @@ export default function HeaderStats({chatid}) {
                   statIconColor="bg-blue-500"
                 />
               </div>
-              <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
+              {/* <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
                   statSubtitle="Total Mistakes"
                   statTitle={loading ? <Loader /> :data.total_errors}
@@ -104,7 +104,7 @@ export default function HeaderStats({chatid}) {
                   statIconName="fas fa-folder"
                   statIconColor="bg-orange-500"
                 />
-              </div>
+              </div> */}
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                
                 <CardStats

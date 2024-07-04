@@ -152,7 +152,7 @@ export default function CardTable({ color }) {
                       {item.description}
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
-                      {formatDate(item.dueDate)}
+                      {formatDate(item.due_date)}
                     </td>
                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
                       {item.is_submitted ? "Yes" : "No"}
