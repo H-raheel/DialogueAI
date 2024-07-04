@@ -1142,7 +1142,7 @@ def get_bar_statistics_for_teacher():
         lambda: {"total_grammar_errors": 0, "total_tone_errors": 0, "total_vocabulary_errors": 0})
 
     for assignment in assignments:
-        assignment_id = assignment.get('name')
+        name = assignment.get('name')
         error_summary[name]["total_grammar_errors"] += assignment.get('grammar_errors', 0)
         error_summary[name]["total_tone_errors"] += assignment.get('tone_errors', 0)
         error_summary[name]["total_vocabulary_errors"] += assignment.get('vocabulary_errors', 0)
@@ -1153,7 +1153,7 @@ def get_bar_statistics_for_teacher():
 
     for name, errors in error_summary.items():
         result = {
-            "assignment_id": assignment_id,
+            "assignment_id": name,
             "total_grammar_errors": errors["total_grammar_errors"],
             "total_tone_errors": errors["total_tone_errors"],
             "total_vocabulary_errors": errors["total_vocabulary_errors"]
@@ -1338,4 +1338,4 @@ def getAssignmentFeedback():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=8888, host='0.0.0.0')
