@@ -1,4 +1,5 @@
 import datetime
+import json
 import random
 import re
 import string
@@ -808,8 +809,8 @@ def create_llm_prompt():
             "user_id": student_id,
             "assignment_id": assignment_id,
             "prompt": system_prompt,
-            "chat": [],
-            "message_history": [],
+            "chat": "",
+            "message_history": "",
             "language": language
         }
 
@@ -866,6 +867,7 @@ def get_student_highest_lowest_achievements_for_teachers_dashboard():
             user = db_users.find_one({"user_id": user_id})
             if user:
                 result.append({"name": user['name'], "errors": errors})
+        result = sorted(result, key=lambda x: x['errors'], reverse=True)
         return result
 
     response = {
@@ -1053,15 +1055,18 @@ def errors():
     db_assignments = connect().Main.assignments
     assignment = db_assignments.find_one({"chat_id": chat_id})
 
-    db = connect().Main.users
+    # db = connect().Main.users
 
+    grammar_errors = 0
+    tone_errors = 0
+    vocabulary_errors = 0
     if assignment:
-        grammer_errors = assignment["grammar_errors"]
+        grammar_errors = assignment["grammar_errors"]
         tone_errors = assignment["tone_errors"]
         vocabulary_errors = assignment["vocabulary_errors"]
 
     return jsonify({
-        "errors": [grammer_errors, vocabulary_errors, tone_errors]
+        "errors": [grammar_errors, vocabulary_errors, tone_errors]
 
     })
 
@@ -1076,6 +1081,11 @@ def general_feedback_student():
 
     db_assignments = connect().Main.assignments
     assignment = db_assignments.find_one({"chat_id": chat_id})
+
+    due_date = None
+    is_submitted = False
+    assignment_name = "Invalid"
+    total_errors = 0
 
     if assignment:
         due_date = assignment["due_date"]
@@ -1121,18 +1131,18 @@ def get_bar_statistics_for_teacher():
         lambda: {"total_grammar_errors": 0, "total_tone_errors": 0, "total_vocabulary_errors": 0})
 
     for assignment in assignments:
-        assignment_id = assignment.get('name')
-        error_summary[assignment_id]["total_grammar_errors"] += assignment.get('grammar_errors', 0)
-        error_summary[assignment_id]["total_tone_errors"] += assignment.get('tone_errors', 0)
-        error_summary[assignment_id]["total_vocabulary_errors"] += assignment.get('vocabulary_errors', 0)
+        name = assignment.get('name')
+        error_summary[name]["total_grammar_errors"] += assignment.get('grammar_errors', 0)
+        error_summary[name]["total_tone_errors"] += assignment.get('tone_errors', 0)
+        error_summary[name]["total_vocabulary_errors"] += assignment.get('vocabulary_errors', 0)
 
     # Format the result
     results = []
     print(f"error_summary = {error_summary}")
 
-    for assignment_id, errors in error_summary.items():
+    for name, errors in error_summary.items():
         result = {
-            "assignment_id": assignment_id,
+            "name": name,
             "total_grammar_errors": errors["total_grammar_errors"],
             "total_tone_errors": errors["total_tone_errors"],
             "total_vocabulary_errors": errors["total_vocabulary_errors"]
@@ -1302,11 +1312,15 @@ def getAssignmentFeedback():
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"Chat Logs:\n{chat}"}
         ],
-        max_tokens=1000
+        max_tokens=550
     )
     feedback = response.choices[0].message.content
     print('feedback:', feedback)
-    feedback = eval(feedback)
+
+    try:
+        feedback = json.loads(feedback)
+    except json.JSONDecodeError:
+        feedback = eval(feedback.replace("'", "\""))
 
     return {'feedback': feedback}
 
