@@ -5,17 +5,19 @@ COPY . /app
 WORKDIR /app
 
 # Install necessary packages
-RUN apt-get update && \
-    apt-get install -y npm 
+RUN apt-get --fix-missing update && \
+    apt-get install -y npm
 
 COPY requirements.txt .
+RUN apt-get install libasound-dev libportaudio2 libportaudiocpp0 portaudio19-dev -y
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install git+https://github.com/openai/whisper.git
 
 # Copy project files to container
 COPY . .
 
-# Install npm packages and build front-end
 RUN npm install yarn
+RUN npm install 
 
 #RUN npm run dev -- --host & \
 #    sleep 10 && \
