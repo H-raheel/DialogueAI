@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import CardGeneralFeedback from "./Cards/Cardfeedback1.js";
 import CardBarChart from "./Cards/FeedbackBarChart.js";
-import ChatMessages from "./chatMessageFeedback.js";
+import ChatMessages from "./chatMessageFeedback.tsx";
 
 export default function Dashboard({ chatid }) {
   const role = useSelector((state) => state.role);
