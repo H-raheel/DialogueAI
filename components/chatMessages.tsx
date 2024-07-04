@@ -37,7 +37,7 @@ export default function ChatMessages({ chatHistory, feedback }: ChatMessagesProp
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 40000); // 40 seconds in milliseconds
+    }, 10000); // 40 seconds in milliseconds
 
     return () => clearTimeout(timer);
   }, []);
