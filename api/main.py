@@ -196,6 +196,8 @@ def update_memory(assignmentid, userid):
     for i in range(0, len(chat_history), 2):
         inp = chat_history[i].split(": ")[1]
         out = chat_history[i + 1].split(": ")[1]
+        print(f"inp = {inp}")
+        print(f"out = {out}")
         conversation.memory.save_context({"input": inp}, {"output": out})
 
     return chat_history, feedback_history
@@ -253,7 +255,8 @@ def getResponse():
     chat_history_list.insert(0, {"role": "system", "content": f"{system_prompt}"})
     chat_history_list.append({'role': 'user', 'content': text})
 
-    print(f"chat_history_list = {chat_history_list}")
+    print(f"chat_history_list = {chat_history_list}".encode('utf-8'))
+
     response_roleplay_ai: ChatCompletion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=chat_history_list,
@@ -310,7 +313,7 @@ def updateChat():
     result = result[0]
 
 
-def transcribe(filename):
+def transcribe(filename, lang):
     """
     Converts voice to text using speech_recognition module
     """
@@ -326,7 +329,7 @@ def transcribe(filename):
     try:
         with sr.AudioFile(filename) as source:
             audio = recognizer.record(source)
-            text = recognizer.recognize_whisper(audio)  # You can try other recognizers as well, besides whisper
+            text = recognizer.recognize_whisper(audio, language=lang)  # You can try other recognizers as well, besides whisper
             return jsonify({"transcription": text})
     except sr.UnknownValueError:
         return jsonify({"error": "Could not understand audio"}), 400
@@ -581,13 +584,20 @@ def update_chat_history_mistakes_for_immediate_feedback():
 
     # Updating message_history of feedbacks
     message_history = result["message_history"]
-    message_history += f"\nHuman:x {text_human}\n"
+    if len(message_history) ==0:
+        message_history += f"Human:x {text_human}\n"
+    else:
+        message_history += f"\nHuman:x {text_human}\n"
     feedback_ai_single_line = " ".join(feedback_ai.splitlines())
     message_history += f"AI:x {feedback_ai_single_line}"
 
     # Updating chat_history of roleplay
     chat_history = result["chat"]
-    chat_history += f"\nHuman: {text_human}\n"
+
+    if len(chat_history) == 0:
+        chat_history += f"Human: {text_human}\n"
+    else:
+        chat_history += f"\nHuman: {text_human}\n"
     chat_history += f"AI: {roleplay_ai}"
 
     db.update_one(
@@ -1223,6 +1233,7 @@ def record_voice():
     data = request.get_json()
     output_filename = data.get('output_filename', 'output.wav')
     record_seconds = data.get('record_seconds', 4)
+    lang = data.get('language')
 
     chunk = 1024  # Record in chunks of 1024 samples
     sample_format = pyaudio.paInt16  # 16 bits per sample
@@ -1262,7 +1273,7 @@ def record_voice():
         wf.writeframes(b''.join(frames))
 
     # Returns text form of the speech
-    transcription = transcribe(output_filename)
+    transcription = transcribe(output_filename, lang)
     return transcription
     # transcription = transcribe(output_filename)
     # return jsonify({"transcription": transcription})
@@ -1327,4 +1338,4 @@ def getAssignmentFeedback():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8888, host='0.0.0.0')
+    app.run(debug=True, port=5000, host='0.0.0.0')
