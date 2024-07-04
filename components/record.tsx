@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import ChatMessages from "./chatMessages";
-
+import { useSelector } from "react-redux";
 import { UserAuth } from "../context/AuthContext";
 import type { ChatId } from "../types/chat";
+import ChatMessages from "./chatMessages";
 
 declare global {
   interface Window {
     webkitSpeechRecognition: any;
   }
 }
+
+
 
 export default function MicrophoneComponent({ chatid }: ChatId) {
   const [isRecording, setIsRecording] = useState(false);
@@ -20,6 +22,7 @@ export default function MicrophoneComponent({ chatid }: ChatId) {
  
   const [chatHistory, setChatHistory] = useState<any>([]);
   const [feedback, setFeedback] = useState<any>([]);
+  const language = useSelector((state:any) => state.language);
   let botMessage="";
   let prompt="";
 let fetchedData=({
@@ -103,6 +106,7 @@ let fetchedData=({
           body: JSON.stringify({
             output_filename: "test.wav",
             record_seconds: 6,
+            "language":language
           }),
         });
         const data = await response.json();

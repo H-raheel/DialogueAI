@@ -108,7 +108,8 @@ def getRole():
     result = db.find({"user_id": uid})[0]
     return {
         'role': result['role'],
-        'name': result['name']
+        'name': result['name'],
+        'language':result['language']
     }
 
 

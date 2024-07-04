@@ -2,39 +2,29 @@ import { GoogleAuthProvider, getAuth, signInWithEmailAndPassword, signInWithPopu
 import { useRouter } from 'next/router';
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { auth } from "../pages/api/firebase";
 import { addUser } from "../store/reducers/authSlice";
 
-import { auth } from "../pages/api/firebase";
 const Loginbox = () => {
- // const { user, role, googleSignIn, setUserAndRole } = UserAuth() || {};
- const dispatch=useDispatch();
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const googleSignIn =  () => {
+  const googleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).then((result) => {
+    try {
+      const result = await signInWithPopup(auth, provider);
       const currentUser = result.user;
-      const role=fetchUserRole(currentUser);
-      dispatch(addUser({ user: currentUser, role: role }));
-      console.log(role);
-      if (role) {
-        if (role === 'teacher') {
-          router.push('/teacher/dashboard');
-        } else if (role === 'student') {
-          router.push('/student/dashboard');
-        }
-      }
-   
-    });
+      await fetchUserRole(currentUser);
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      alert('Google sign-in failed. Please try again.');
+    }
   };
 
-  const  fetchUserRole = async (user) => {
+  const fetchUserRole = async (user) => {
     if (user) {
-      console.log("heee")
-      console.log(user)
       try {
         const response = await fetch('/api/get_role', {
           method: 'POST',
@@ -43,64 +33,32 @@ const Loginbox = () => {
           },
           body: JSON.stringify({ uid: user.uid }),
         });
-        const data =await response.json();
-        return data.role;
-        console.log("data",data)
-      //  setRole(data.role);
-        
+        const data = await response.json();
+        const { role, language } = data;
+        console.log("User role:", role);
+        dispatch(addUser({ user: user.uid, role, language }));
+        if (role === 'teacher') {
+          router.push('/teacher/dashboard');
+        } else if (role === 'student') {
+          router.push('/student/dashboard');
+        }
       } catch (error) {
         console.error('Error fetching user role:', error);
+        alert('Failed to fetch user role. Please try again.');
       }
-    } else {
-      alert(error)
     }
   };
 
-  const handleSignIn = async (event) => {
-    event.preventDefault();
-    try {
-      await googleSignIn();
-    } catch (error) {
-      console.log(error);
-      alert(error);
-    }
-  };
-
-  // useEffect(() => {
-  //   console.log('inuseff')
-  //   if (role) {
-  //     if (role === 'teacher') {
-  //       router.push('/teacher/dashboard');
-  //     } else if (role === 'student') {
-  //       router.push('/student/dashboard');
-  //     }
-  //   }
-  // }, [role, router]);
-
-  const emailSubmit = async () => {
+  const handleSignIn = async () => {
     const auth = getAuth();
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       const authUser = result.user;
-      console.log(authUser)
-      const role=await fetchUserRole(authUser);
-      console.log("rollee")
-      console.log(role);
-      dispatch(addUser({ user: authUser.uid
-        , role: role }));
+      await fetchUserRole(authUser);
       alert("Success. You are now logged in.");
-      if (role) {
-        console.log("pushingg")
-            if (role === 'teacher') {
-              router.push('/teacher/dashboard');
-            } else if (role === 'student') {
-              router.push('/student/dashboard');
-            }
-          }
-      //await setUserAndRole(authUser); // Set user and role
+      // Routing based on role handled in fetchUserRole function
     } catch (error) {
-      console.log(error);
-    
+      console.error('Email/password sign-in error:', error);
       alert(error.message);
     }
   };
@@ -132,10 +90,16 @@ const Loginbox = () => {
           <div className="mt-2">
             <button
               className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
-              onClick={emailSubmit}
+              onClick={handleSignIn}
             >
               Login
             </button>
+            {/* <button
+              className="w-full mt-2 px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+              onClick={googleSignIn}
+            >
+              Sign in with Google
+            </button> */}
           </div>
         </div>
       </div>
